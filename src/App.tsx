@@ -9,6 +9,7 @@ import ProtectedRoute from './components/control/ProtectedRoute'
 import Admin from './pages/Admin'
 import AdminRoute from './components/control/AdminRoute'
 import GlobalToast from './components/GlobalToast'
+import InstallPWA from './components/InstallPWA'
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         />
       </Routes>
       <GlobalToast />
+      <InstallPWA />
     </>
   )
 }
