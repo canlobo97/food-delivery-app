@@ -13,9 +13,11 @@ import {
 } from '@mui/material'
 import { useDispatch } from 'react-redux'
 import { showToast } from '../store/toastSlice'
+import OrderDialog from '../components/OrderDialog'
 
 export default function Admin() {
   const [orders, setOrders] = useState<any[]>([])
+  const [incomingOrder, setIncomingOrder] = useState<any | null>(null)
   const [filters, setFilters] = useState({
     status: '',
     name: '',
@@ -42,8 +44,7 @@ export default function Admin() {
 
   const audio = new Audio('/ding.wav')
 
-  // 🔥 FETCH + REALTIME
-  useEffect(() => {
+useEffect(() => {
   const fetchOrders = async () => {
     const { data, error } = await supabase
       .from('orders')
@@ -51,7 +52,13 @@ export default function Admin() {
       .order('created_at', { ascending: false })
 
     if (error) console.error(error)
-    else setOrders(data || [])
+    else {
+      // ❌ NON caricare quelli in elaborazione nella lista
+      const filtered = (data || []).filter(
+        (o) => o.status !== 'in_elaborazione'
+      )
+      setOrders(filtered)
+    }
   }
 
   fetchOrders()
@@ -68,29 +75,54 @@ export default function Admin() {
       (payload) => {
         console.log('🔥 REALTIME EVENT:', payload)
 
+        // 🆕 INSERT
         if (payload.eventType === 'INSERT') {
-            setOrders((prev) => [payload.new, ...prev])
+          const newOrder = payload.new
 
-            audio.currentTime = 0
-            audio.play().catch(err => console.log(err))
+          // 👉 se è in elaborazione → popup
+          if (newOrder.status === 'in_elaborazione') {
+            setIncomingOrder(newOrder)
+          } else {
+            setOrders((prev) => [newOrder, ...prev])
+          }
 
-            // 💬 TOAST REDUX
-            dispatch(
-                showToast({
-                message: `Nuovo ordine da ${payload.new.customer?.name}`,
-                type: 'success'
-                })
-            )
-        }
+          // 🔊 suono
+          audio.currentTime = 0
+          audio.play().catch(() => {})
 
-        if (payload.eventType === 'UPDATE') {
-          setOrders((prev) =>
-            prev.map((o) =>
-              o.id === payload.new.id ? payload.new : o
-            )
+          // 💬 toast
+          dispatch(
+            showToast({
+              message: `Nuovo ordine da ${newOrder.customer?.name}`,
+              type: 'success'
+            })
           )
         }
 
+        // 🔄 UPDATE
+        if (payload.eventType === 'UPDATE') {
+        const updated = payload.new
+
+        setOrders((prev) => {
+            const exists = prev.find((o) => o.id === updated.id)
+
+            if (updated.status === 'in_elaborazione') {
+            return prev // non mostrarlo
+            }
+
+            if (exists) {
+            // aggiorna ordine esistente
+            return prev.map((o) =>
+                o.id === updated.id ? updated : o
+            )
+            }
+
+            // nuovo ordine accettato → aggiungi
+            return [updated, ...prev]
+        })
+        }
+
+        // 🗑 DELETE
         if (payload.eventType === 'DELETE') {
           setOrders((prev) =>
             prev.filter((o) => o.id !== payload.old.id)
@@ -106,6 +138,24 @@ export default function Admin() {
     supabase.removeChannel(channel)
   }
 }, [])
+
+
+    const handleAccept = async (order: any) => {
+    await supabase
+        .from('orders')
+        .update({ status: 'in_preparazione' })
+        .eq('id', order.id)
+    setIncomingOrder(null)
+    }
+
+    const handleReject = async (order: any) => {
+    await supabase
+        .from('orders')
+        .update({ status: 'cancellato' })
+        .eq('id', order.id)
+
+    setIncomingOrder(null)
+    }
 
   // 🔍 FILTRI
   const filteredOrders = orders.filter((order) => {
@@ -308,6 +358,12 @@ export default function Admin() {
           </Box>
         ))
       )}
+      <OrderDialog
+  order={incomingOrder}
+  onAccept={handleAccept}
+  onReject={handleReject}
+  onClose={() => setIncomingOrder(null)}
+/>
     </Container>
   )
 }
