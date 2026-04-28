@@ -6,12 +6,15 @@ const products = [
   { id: 1, name: 'Pizza Margherita', price: 8 , img: noodles},
   { id: 2, name: 'Burger', price: 10 , img: noodles},
   { id: 3, name: 'Pasta Carbonara', price: 12 , img: noodles},
-  { id: 4, name: 'Insalata', price: 6 , img: noodles}
+  { id: 4, name: 'Insalata', price: 6 , img: noodles},
+  { id: 5, name: 'ravioli', price: 4 , img: noodles},
+  { id: 6, name: 'nigiri', price: 6 , img: noodles},
+  { id: 7, name: 'sashimi', price: 8 , img: noodles}
 ]
 
 export default function Menu() {
   return (
-    <Container sx={{ mt: 4 }}>
+    <Container sx={{ mt: 4, pb: 10 }}>
       <Typography variant="h4" gutterBottom>
         Menu 🍕
       </Typography>

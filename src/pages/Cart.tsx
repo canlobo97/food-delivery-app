@@ -26,10 +26,34 @@ export default function Cart() {
   )
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Carrello 🛒
-      </Typography>
+    <Container sx={{ mt: 4, pb: 20 }}>
+
+      {/* 🔥 HEADER */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2
+        }}
+      >
+        <Typography variant="h4">
+          Carrello 🛒
+        </Typography>
+
+        {cart.length > 0 && (
+          <Button
+            onClick={() => dispatch(clearCart())}
+            sx={{
+              color: '#ff4b2b',
+              fontWeight: 'bold',
+              textTransform: 'none'
+            }}
+          >
+            🗑 Svuota
+          </Button>
+        )}
+      </Box>
 
       {cart.length === 0 ? (
         <Typography>Il carrello è vuoto</Typography>
@@ -43,10 +67,9 @@ export default function Cart() {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 mb: 2,
-                p: 2,
+                p: 1.5,
                 borderRadius: 3,
 
-                // 🔥 GLASS STYLE
                 backdropFilter: 'blur(10px)',
                 backgroundColor: 'rgba(0,0,0,0.7)',
                 color: '#fff',
@@ -76,14 +99,13 @@ export default function Cart() {
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1
                 }}
               >
                 <Button
                   variant="outlined"
                   onClick={() => dispatch(decrementQuantity(item.id))}
                   sx={{
-                    minWidth: 40,
+                    minWidth: 20,
                     color: '#fff',
                     borderColor: 'rgba(255,255,255,0.2)'
                   }}
@@ -99,7 +121,7 @@ export default function Cart() {
                   variant="outlined"
                   onClick={() => dispatch(incrementQuantity(item.id))}
                   sx={{
-                    minWidth: 40,
+                    minWidth: 20,
                     color: '#fff',
                     borderColor: 'rgba(255,255,255,0.2)'
                   }}
@@ -109,99 +131,119 @@ export default function Cart() {
 
                 <Button
                   color="error"
+                  sx={{ fontWeight: 'bold' }}
                   onClick={() => dispatch(removeFromCart(item.id))}
                 >
-                  Rimuovi
+                  X
                 </Button>
               </Box>
             </Box>
           ))}
 
-          {/* 💰 TOTALE */}
+          {/* 🔥 STICKY BOTTOM BAR */}
           <Box
             sx={{
-              mt: 3,
-              p: 2,
-              borderRadius: 3,
-              backdropFilter: 'blur(10px)',
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.1)'
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              width: '100%',
+              zIndex: 2000,
+
+
+              backdropFilter: 'blur(12px)',
+              backgroundColor: 'rgba(0,0,0,0.9)',
+              borderTop: '1px solid rgba(255,255,255,0.1)'
             }}
           >
-            <Typography variant="h5">
-              Totale: {total}€
-            </Typography>
-          </Box>
-
-          {/* 🔥 BOTTONI */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', mt: 3 }}>
-
-            {/* 🔥 PRIMA RIGA */}
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              
-              {/* 🔙 TORNA */}
-              <Button
-                variant="contained"
-                component={Link}
-                to="/menu"
-                sx={{
-                  flex: 1,
-                  height: 60,
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
-                  textTransform: 'none',
-                  backgroundColor: '#d32f2f',
-                  '&:hover': {
-                  transform: 'scale(1.02)'
-                  }
-                }}
-              >
-                Ordina ancora
-              </Button>
-
-              {/* 🗑 SVUOTA */}
-              <Button
-                variant="contained"
-                onClick={() => dispatch(clearCart())}
-                sx={{
-                  flex: 1,
-                  height: 60,
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
-                  textTransform: 'none',
-                  backgroundColor: '#d32f2f',
-                  '&:hover': {
-                  transform: 'scale(1.02)'
-                }
-                }}
-              >
-                🗑 Svuota
-              </Button>
-            </Box>
-
-            {/* 💳 PAGA */}
-            <Button
-              variant="contained"
-              component={Link}
-              to="/checkout"
+            {/* 👇 CONTENITORE CENTRATO */}
+            <Box
               sx={{
-                height: 65,
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                textTransform: 'none',
-
-                background: 'linear-gradient(45deg, #ff416c, #ff4b2b)',
-                boxShadow: '0 6px 20px rgba(255,75,43,0.5)',
-
-                '&:hover': {
-                  transform: 'scale(1.02)'
-                }
+                maxWidth: 600,
+                mx: 'auto',
+                width: '90%',
+                px: 1, // 🔥 QUESTO RISOLVE MOBILE
+                py: 3
               }}
             >
-              💳 Paga
-            </Button>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 
+                {/* TORNA */}
+                <Button
+                  fullWidth
+                  variant="contained"
+                  component={Link}
+                  to="/menu"
+                  sx={{
+                    height: 50,
+                    fontWeight: 'bold',
+                    textTransform: 'none',
+
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.15)'
+                  }}
+                >
+                  ← Torna ad ordinare
+                </Button>
+
+                {/* 💰 TOTALE + 💳 PAGA */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+
+                    p: 1.5,
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  {/* TOTALE */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        opacity: 0.7,
+                        color: '#fff' // 🔥 FIX COLORE
+                      }}
+                    >
+                      Totale
+                    </Typography>
+
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 'bold',
+                        color: '#fff' // 🔥 FIX COLORE
+                      }}
+                    >
+                      {total}€
+                    </Typography>
+                  </Box>
+
+                  {/* PAGA */}
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/checkout"
+                    sx={{
+                      height: 55,
+                      px: 4,
+                      fontSize: '1rem',
+                      fontWeight: 'bold',
+                      textTransform: 'none',
+
+                      background: 'linear-gradient(45deg, #ff416c, #ff4b2b)',
+                      boxShadow: '0 6px 20px rgba(255,75,43,0.5)'
+                    }}
+                  >
+                    💳 Paga
+                  </Button>
+                </Box>
+
+              </Box>
+            </Box>
           </Box>
         </>
       )}
