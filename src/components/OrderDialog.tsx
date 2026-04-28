@@ -20,16 +20,16 @@ export default function OrderDialog({
   onReject
 }: Props) {
   return (
-    <Dialog
-      open={!!order}
-      fullWidth
-      maxWidth="sm"
-      disableEscapeKeyDown
-      onClose={(event, reason) => {
-        // 🔒 blocca chiusura accidentale
-        if (reason === 'backdropClick') return
-      }}
-    >
+      <Dialog
+        open={!!order}
+        fullWidth
+        maxWidth="sm"
+        onClose={(_, reason) => {
+          if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+            return
+          }
+        }}
+      >
       <DialogTitle>🚨 Nuovo ordine</DialogTitle>
 
       <DialogContent>
