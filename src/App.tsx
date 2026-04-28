@@ -10,6 +10,7 @@ import Admin from './pages/Admin'
 import AdminRoute from './components/control/AdminRoute'
 import GlobalToast from './components/GlobalToast'
 import InstallPWA from './components/InstallPWA'
+import FloatingCart from './components/FloatingCart'
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
       </Routes>
       <GlobalToast />
       <InstallPWA />
+      <FloatingCart />
     </>
   )
 }
