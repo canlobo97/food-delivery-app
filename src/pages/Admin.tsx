@@ -43,24 +43,32 @@ export default function Admin() {
     if (error) console.error(error)
   }
 
+  // 🔊 INIT AUDIO LOOP
   useEffect(() => {
     const audio = new Audio('/ding.wav')
     audio.loop = true
     audio.volume = 1
-
     audioRef.current = audio
   }, [])
 
-  const currentOrder = incomingOrders[0]
-
+  // 🔊 GESTIONE AUDIO
   useEffect(() => {
     if (!audioRef.current) return
 
     if (incomingOrders.length === 0) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
+    } else if (audioRef.current.paused) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch(() => {})
     }
-  }, [incomingOrders])  
+  }, [incomingOrders])
+
+  // 🔥 ORDINE CORRENTE (PIÙ VECCHIO)
+  const currentOrder =
+    incomingOrders.length > 0
+      ? incomingOrders[incomingOrders.length - 1]
+      : null
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -69,13 +77,25 @@ export default function Admin() {
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) console.error(error)
-      else {
-        const filtered = (data || []).filter(
-          (o) => o.status !== 'in_elaborazione'
-        )
-        setOrders(filtered)
+      if (error) {
+        console.error(error)
+        return
       }
+
+      const all = data || []
+
+      // 🔥 ORDINI NON GESTITI → QUEUE
+      const pending = all.filter(
+        (o) => o.status === 'in_elaborazione'
+      )
+
+      // 📦 ORDINI NORMALI
+      const visible = all.filter(
+        (o) => o.status !== 'in_elaborazione'
+      )
+
+      setIncomingOrders(pending)
+      setOrders(visible)
     }
 
     fetchOrders()
@@ -92,15 +112,12 @@ export default function Admin() {
         (payload) => {
           console.log('🔥 REALTIME EVENT:', payload)
 
+          // 🆕 NUOVO ORDINE
           if (payload.eventType === 'INSERT') {
             const newOrder = payload.new
 
             if (newOrder.status === 'in_elaborazione') {
               setIncomingOrders((prev) => [newOrder, ...prev])
-              if (audioRef.current && audioRef.current.paused) {
-                audioRef.current.currentTime = 0
-                audioRef.current.play().catch(() => {})
-              }
             } else {
               setOrders((prev) => [newOrder, ...prev])
             }
@@ -113,6 +130,7 @@ export default function Admin() {
             )
           }
 
+          // 🔄 UPDATE
           if (payload.eventType === 'UPDATE') {
             const updated = payload.new
 
@@ -131,6 +149,7 @@ export default function Admin() {
             })
           }
 
+          // 🗑 DELETE
           if (payload.eventType === 'DELETE') {
             setOrders((prev) =>
               prev.filter((o) => o.id !== payload.old.id)
@@ -169,6 +188,7 @@ export default function Admin() {
     )
   }
 
+  // 🔍 FILTRI
   const filteredOrders = orders.filter((order) => {
     const matchStatus =
       !filters.status || order.status === filters.status
@@ -198,7 +218,7 @@ export default function Admin() {
         Admin Panel 🔥
       </Typography>
 
-      {/* 🔔 NOTIFICA ORDINI */}
+      {/* 🔔 NOTIFICA */}
       {incomingOrders.length > 0 && (
         <Typography color="error" sx={{ mt: 2 }}>
           🔔 {incomingOrders.length} nuovi ordini
@@ -261,7 +281,7 @@ export default function Admin() {
         />
       </Box>
 
-      {/* 📦 LISTA COMPLETA */}
+      {/* 📦 LISTA */}
       {filteredOrders.length === 0 ? (
         <Typography sx={{ mt: 2 }}>
           Nessun ordine trovato
@@ -314,7 +334,6 @@ export default function Admin() {
               Telefono: {order.customer?.phone}
             </Typography>
 
-            {/* 🧾 PRODOTTI */}
             <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle1">
                 Prodotti:
@@ -341,7 +360,6 @@ export default function Admin() {
               ))}
             </Box>
 
-            {/* 🔥 BOTTONI */}
             <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
               {order.status === 'in_preparazione' && (
                 <Button
