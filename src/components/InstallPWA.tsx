@@ -4,7 +4,7 @@ import CloseIcon from '@mui/icons-material/Close'
 
 export default function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(true)
 
   const isIOS = /iphone|ipad|ipod/.test(
     window.navigator.userAgent.toLowerCase()
