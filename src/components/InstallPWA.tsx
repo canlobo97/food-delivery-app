@@ -79,13 +79,13 @@ export default function InstallPWA() {
       {/* 🎨 testo */}
       <Box>
         {isIOS ? (
-          <Typography fontSize={14}>
+          <Typography sx={{ fontSize: 14 }}>
             📲 Installa l’app:
             <br />
             <b>Condividi → Aggiungi a Home</b>
           </Typography>
         ) : (
-          <Typography fontSize={14}>
+          <Typography sx={{ fontSize: 14 }}>
             🚀 Installa EnjoyEat
             <br />
             Accesso veloce e notifiche 🔔
