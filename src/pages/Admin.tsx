@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import {
   Container,
@@ -17,13 +17,15 @@ import OrderDialog from '../components/OrderDialog'
 
 export default function Admin() {
   const [orders, setOrders] = useState<any[]>([])
-  const [incomingOrder, setIncomingOrder] = useState<any | null>(null)
+  const [incomingOrders, setIncomingOrders] = useState<any[]>([]) // 🔥 QUEUE
   const [filters, setFilters] = useState({
     status: '',
     name: '',
     phone: '',
     date: ''
   })
+
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const dispatch = useDispatch()
 
@@ -32,7 +34,6 @@ export default function Admin() {
     0
   )
 
-  // 🔥 UPDATE STATUS
   const updateStatus = async (orderId: string, newStatus: string) => {
     const { error } = await supabase
       .from('orders')
@@ -42,122 +43,132 @@ export default function Admin() {
     if (error) console.error(error)
   }
 
-  const audio = new Audio('/ding.wav')
+  useEffect(() => {
+    const audio = new Audio('/ding.wav')
+    audio.loop = true
+    audio.volume = 1
 
-useEffect(() => {
-  const fetchOrders = async () => {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
+    audioRef.current = audio
+  }, [])
 
-    if (error) console.error(error)
-    else {
-      // ❌ NON caricare quelli in elaborazione nella lista
-      const filtered = (data || []).filter(
-        (o) => o.status !== 'in_elaborazione'
-      )
-      setOrders(filtered)
+  const currentOrder = incomingOrders[0]
+
+  useEffect(() => {
+    if (!audioRef.current) return
+
+    if (incomingOrders.length === 0) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
     }
-  }
+  }, [incomingOrders])  
 
-  fetchOrders()
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-  const channel = supabase
-    .channel('orders-channel')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'orders'
-      },
-      (payload) => {
-        console.log('🔥 REALTIME EVENT:', payload)
+      if (error) console.error(error)
+      else {
+        const filtered = (data || []).filter(
+          (o) => o.status !== 'in_elaborazione'
+        )
+        setOrders(filtered)
+      }
+    }
 
-        // 🆕 INSERT
-        if (payload.eventType === 'INSERT') {
-          const newOrder = payload.new
+    fetchOrders()
 
-          // 👉 se è in elaborazione → popup
-          if (newOrder.status === 'in_elaborazione') {
-            setIncomingOrder(newOrder)
-          } else {
-            setOrders((prev) => [newOrder, ...prev])
+    const channel = supabase
+      .channel('orders-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders'
+        },
+        (payload) => {
+          console.log('🔥 REALTIME EVENT:', payload)
+
+          if (payload.eventType === 'INSERT') {
+            const newOrder = payload.new
+
+            if (newOrder.status === 'in_elaborazione') {
+              setIncomingOrders((prev) => [newOrder, ...prev])
+              if (audioRef.current && audioRef.current.paused) {
+                audioRef.current.currentTime = 0
+                audioRef.current.play().catch(() => {})
+              }
+            } else {
+              setOrders((prev) => [newOrder, ...prev])
+            }
+
+            dispatch(
+              showToast({
+                message: `Nuovo ordine da ${newOrder.customer?.name}`,
+                type: 'success'
+              })
+            )
           }
 
-          // 🔊 suono
-          audio.currentTime = 0
-          audio.play().catch(() => {})
+          if (payload.eventType === 'UPDATE') {
+            const updated = payload.new
 
-          // 💬 toast
-          dispatch(
-            showToast({
-              message: `Nuovo ordine da ${newOrder.customer?.name}`,
-              type: 'success'
+            setOrders((prev) => {
+              const exists = prev.find((o) => o.id === updated.id)
+
+              if (updated.status === 'in_elaborazione') return prev
+
+              if (exists) {
+                return prev.map((o) =>
+                  o.id === updated.id ? updated : o
+                )
+              }
+
+              return [updated, ...prev]
             })
-          )
-        }
+          }
 
-        // 🔄 UPDATE
-        if (payload.eventType === 'UPDATE') {
-        const updated = payload.new
-
-        setOrders((prev) => {
-            const exists = prev.find((o) => o.id === updated.id)
-
-            if (updated.status === 'in_elaborazione') {
-            return prev // non mostrarlo
-            }
-
-            if (exists) {
-            // aggiorna ordine esistente
-            return prev.map((o) =>
-                o.id === updated.id ? updated : o
+          if (payload.eventType === 'DELETE') {
+            setOrders((prev) =>
+              prev.filter((o) => o.id !== payload.old.id)
             )
-            }
-
-            // nuovo ordine accettato → aggiungi
-            return [updated, ...prev]
-        })
+          }
         }
+      )
+      .subscribe()
 
-        // 🗑 DELETE
-        if (payload.eventType === 'DELETE') {
-          setOrders((prev) =>
-            prev.filter((o) => o.id !== payload.old.id)
-          )
-        }
-      }
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  // ✅ ACCEPT
+  const handleAccept = async (order: any) => {
+    await supabase
+      .from('orders')
+      .update({ status: 'in_preparazione' })
+      .eq('id', order.id)
+
+    setIncomingOrders((prev) =>
+      prev.filter((o) => o.id !== order.id)
     )
-    .subscribe((status) => {
-      console.log('📡 REALTIME STATUS:', status)
-    })
-
-  return () => {
-    supabase.removeChannel(channel)
   }
-}, [])
 
-
-    const handleAccept = async (order: any) => {
+  // ❌ REJECT
+  const handleReject = async (order: any) => {
     await supabase
-        .from('orders')
-        .update({ status: 'in_preparazione' })
-        .eq('id', order.id)
-    setIncomingOrder(null)
-    }
+      .from('orders')
+      .update({ status: 'cancellato' })
+      .eq('id', order.id)
 
-    const handleReject = async (order: any) => {
-    await supabase
-        .from('orders')
-        .update({ status: 'cancellato' })
-        .eq('id', order.id)
+    setIncomingOrders((prev) =>
+      prev.filter((o) => o.id !== order.id)
+    )
+  }
 
-    setIncomingOrder(null)
-    }
-
-  // 🔍 FILTRI
   const filteredOrders = orders.filter((order) => {
     const matchStatus =
       !filters.status || order.status === filters.status
@@ -186,6 +197,13 @@ useEffect(() => {
       <Typography variant="h4">
         Admin Panel 🔥
       </Typography>
+
+      {/* 🔔 NOTIFICA ORDINI */}
+      {incomingOrders.length > 0 && (
+        <Typography color="error" sx={{ mt: 2 }}>
+          🔔 {incomingOrders.length} nuovi ordini
+        </Typography>
+      )}
 
       {/* 📊 STATS */}
       <Box sx={{ display: 'flex', gap: 4, mt: 3 }}>
@@ -235,7 +253,7 @@ useEffect(() => {
         />
 
         <TextField
-          label="Data (gg/mm/aaaa)"
+          label="Data"
           value={filters.date}
           onChange={(e) =>
             setFilters({ ...filters, date: e.target.value })
@@ -243,7 +261,7 @@ useEffect(() => {
         />
       </Box>
 
-      {/* 📦 LISTA */}
+      {/* 📦 LISTA COMPLETA */}
       {filteredOrders.length === 0 ? (
         <Typography sx={{ mt: 2 }}>
           Nessun ordine trovato
@@ -263,7 +281,6 @@ useEffect(() => {
               Totale: {order.total}€
             </Typography>
 
-            {/* 🎨 STATO */}
             <Typography sx={{ mt: 1 }}>
               Stato:{' '}
               <span
@@ -324,7 +341,7 @@ useEffect(() => {
               ))}
             </Box>
 
-            {/* 🔥 BOTTONI STATO */}
+            {/* 🔥 BOTTONI */}
             <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
               {order.status === 'in_preparazione' && (
                 <Button
@@ -358,12 +375,13 @@ useEffect(() => {
           </Box>
         ))
       )}
+
+      {/* 🔥 POPUP */}
       <OrderDialog
-  order={incomingOrder}
-  onAccept={handleAccept}
-  onReject={handleReject}
-  onClose={() => setIncomingOrder(null)}
-/>
+        order={currentOrder}
+        onAccept={handleAccept}
+        onReject={handleReject}
+      />
     </Container>
   )
 }

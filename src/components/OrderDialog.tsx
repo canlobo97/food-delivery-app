@@ -12,17 +12,24 @@ type Props = {
   order: any | null
   onAccept: (order: any) => void
   onReject: (order: any) => void
-  onClose: () => void
 }
 
 export default function OrderDialog({
   order,
   onAccept,
-  onReject,
-  onClose
+  onReject
 }: Props) {
   return (
-    <Dialog open={!!order} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog
+      open={!!order}
+      fullWidth
+      maxWidth="sm"
+      disableEscapeKeyDown
+      onClose={(event, reason) => {
+        // 🔒 blocca chiusura accidentale
+        if (reason === 'backdropClick') return
+      }}
+    >
       <DialogTitle>🚨 Nuovo ordine</DialogTitle>
 
       <DialogContent>
