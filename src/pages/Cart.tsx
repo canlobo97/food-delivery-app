@@ -1,9 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import {
-  incrementQuantity,
-  decrementQuantity,
-  removeFromCart,
   clearCart
 } from '../store/cartSlice'
 import type { RootState, AppDispatch } from '../store/store'
@@ -13,8 +10,6 @@ import {
   Button,
   Box
 } from '@mui/material'
-import RemoveIcon from '@mui/icons-material/Remove'
-import AddIcon from '@mui/icons-material/Add'
 import CartItem from '../components/product/CartItem'
 
 export default function Cart() {
