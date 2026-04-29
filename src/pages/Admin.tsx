@@ -14,6 +14,7 @@ import {
 import { useDispatch } from 'react-redux'
 import { showToast } from '../store/toastSlice'
 import OrderDialog from '../components/OrderDialog'
+import { formatPrice } from '../utils/format'
 
 export default function Admin() {
   const [orders, setOrders] = useState<any[]>([])
@@ -229,7 +230,7 @@ export default function Admin() {
       <Box sx={{ display: 'flex', gap: 4, mt: 3 }}>
         <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: 2 }}>
           <Typography variant="h6">💸 Entrate totali</Typography>
-          <Typography variant="h5">{totalRevenue}€</Typography>
+          <Typography variant="h5">{formatPrice(totalRevenue)}</Typography>
         </Box>
 
         <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: 2 }}>
@@ -298,7 +299,7 @@ export default function Admin() {
             }}
           >
             <Typography variant="h6">
-              Totale: {order.total}€
+              Totale: {formatPrice(order.total)}
             </Typography>
 
             <Typography sx={{ mt: 1 }}>

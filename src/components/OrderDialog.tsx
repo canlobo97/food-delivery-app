@@ -7,6 +7,7 @@ import {
   Box,
   Button
 } from '@mui/material'
+import { formatPrice } from '../utils/format'
 
 type Props = {
   order: any | null
@@ -60,7 +61,7 @@ export default function OrderDialog({
             </Box>
 
             <Typography sx={{ mt: 2 }}>
-              Totale: {order.total}€
+              Totale: {formatPrice(order.total)}€
             </Typography>
           </>
         )}
