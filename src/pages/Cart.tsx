@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import RemoveIcon from '@mui/icons-material/Remove'
 import AddIcon from '@mui/icons-material/Add'
+import CartItem from '../components/product/CartItem'
 
 export default function Cart() {
   const dispatch = useDispatch<AppDispatch>()
@@ -60,84 +61,7 @@ export default function Cart() {
       ) : (
         <>
           {cart.map((item) => (
-            <Box
-              key={item.id}
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 2,
-                p: 1.5,
-                borderRadius: 3,
-
-                backdropFilter: 'blur(10px)',
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                color: '#fff',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.4)',
-
-                transition: 'all 0.2s ease',
-
-                '&:hover': {
-                  transform: 'scale(1.01)',
-                  backgroundColor: 'rgba(0,0,0,0.8)'
-                }
-              }}
-            >
-              {/* NOME */}
-              <Typography sx={{ fontWeight: 500 }}>
-                {item.name}
-              </Typography>
-
-              {/* PREZZO */}
-              <Typography sx={{ fontWeight: 'bold' }}>
-                {item.price * item.quantity}€
-              </Typography>
-
-              {/* CONTROLLI */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <Button
-                  variant="outlined"
-                  onClick={() => dispatch(decrementQuantity(item.id))}
-                  sx={{
-                    minWidth: 20,
-                    color: '#fff',
-                    borderColor: 'rgba(255,255,255,0.2)'
-                  }}
-                >
-                  <RemoveIcon />
-                </Button>
-
-                <Typography sx={{ minWidth: 20, textAlign: 'center' }}>
-                  {item.quantity}
-                </Typography>
-
-                <Button
-                  variant="outlined"
-                  onClick={() => dispatch(incrementQuantity(item.id))}
-                  sx={{
-                    minWidth: 20,
-                    color: '#fff',
-                    borderColor: 'rgba(255,255,255,0.2)'
-                  }}
-                >
-                  <AddIcon />
-                </Button>
-
-                <Button
-                  color="error"
-                  sx={{ fontWeight: 'bold' }}
-                  onClick={() => dispatch(removeFromCart(item.id))}
-                >
-                  X
-                </Button>
-              </Box>
-            </Box>
+            <CartItem key={item.id} item={item} />
           ))}
 
           {/* 🔥 STICKY BOTTOM BAR */}
@@ -148,8 +72,6 @@ export default function Cart() {
               left: 0,
               width: '100%',
               zIndex: 2000,
-
-
               backdropFilter: 'blur(12px)',
               backgroundColor: 'rgba(0,0,0,0.9)',
               borderTop: '1px solid rgba(255,255,255,0.1)'

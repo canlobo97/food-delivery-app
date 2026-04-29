@@ -5,6 +5,8 @@ type Product = {
   id: number
   name: string
   price: number
+  image?: string
+  notes?: string
 }
 
 type CartItem = Product & {
@@ -31,7 +33,22 @@ const cartSlice = createSlice({
       if (existing) {
         existing.quantity += 1
       } else {
-        state.items.push({ ...action.payload, quantity: 1 })
+        state.items.push({
+          ...action.payload,
+          notes: action.payload.notes || '',
+          quantity: 1
+        })
+      }
+    },
+
+    // NUOVA ACTION PER NOTE DAL CARRELLO
+    updateNote: (
+      state,
+      action: PayloadAction<{ id: number; notes: string }>
+    ) => {
+      const item = state.items.find(i => i.id === action.payload.id)
+      if (item) {
+        item.notes = action.payload.notes
       }
     },
 
@@ -64,7 +81,8 @@ export const {
   removeFromCart,
   incrementQuantity,
   decrementQuantity,
-  clearCart
+  clearCart,
+  updateNote // 👈 IMPORTANTISSIMO
 } = cartSlice.actions
 
 export default cartSlice.reducer
