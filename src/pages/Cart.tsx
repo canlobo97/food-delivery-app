@@ -1,8 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import {
-  clearCart
-} from '../store/cartSlice'
+import { clearCart } from '../store/cartSlice'
 import type { RootState, AppDispatch } from '../store/store'
 import {
   Container,
@@ -11,6 +9,9 @@ import {
   Box
 } from '@mui/material'
 import CartItem from '../components/product/CartItem'
+
+// 🔥 IMPORT FORMAT
+import { formatPrice } from '../utils/format'
 
 export default function Cart() {
   const dispatch = useDispatch<AppDispatch>()
@@ -23,7 +24,6 @@ export default function Cart() {
 
   return (
     <Container sx={{ mt: 4, pb: 20 }}>
-
       {/* 🔥 HEADER */}
       <Box
         sx={{
@@ -78,7 +78,7 @@ export default function Cart() {
                 maxWidth: 600,
                 mx: 'auto',
                 width: '90%',
-                px: 1, // 🔥 QUESTO RISOLVE MOBILE
+                px: 1,
                 py: 3
               }}
             >
@@ -94,7 +94,6 @@ export default function Cart() {
                     height: 50,
                     fontWeight: 'bold',
                     textTransform: 'none',
-
                     backgroundColor: 'rgba(255,255,255,0.08)',
                     color: '#fff',
                     border: '1px solid rgba(255,255,255,0.15)'
@@ -109,7 +108,6 @@ export default function Cart() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
-
                     p: 1.5,
                     borderRadius: 2,
                     backgroundColor: 'rgba(255,255,255,0.05)',
@@ -122,7 +120,7 @@ export default function Cart() {
                       variant="body2"
                       sx={{
                         opacity: 0.7,
-                        color: '#fff' // 🔥 FIX COLORE
+                        color: '#fff'
                       }}
                     >
                       Totale
@@ -132,10 +130,10 @@ export default function Cart() {
                       variant="h6"
                       sx={{
                         fontWeight: 'bold',
-                        color: '#fff' // 🔥 FIX COLORE
+                        color: '#fff'
                       }}
                     >
-                      {total}€
+                      {formatPrice(total)}
                     </Typography>
                   </Box>
 
@@ -150,7 +148,6 @@ export default function Cart() {
                       fontSize: '1rem',
                       fontWeight: 'bold',
                       textTransform: 'none',
-
                       background: 'linear-gradient(45deg, #ff416c, #ff4b2b)',
                       boxShadow: '0 6px 20px rgba(255,75,43,0.5)'
                     }}

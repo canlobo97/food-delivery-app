@@ -11,6 +11,7 @@ import {
 } from '../../store/cartSlice'
 import type { AppDispatch } from '../../store/store'
 import { useState } from 'react'
+import { formatPrice } from '../../utils/format'
 
 export default function CartItem({ item }: any) {
   const dispatch = useDispatch<AppDispatch>()
@@ -26,15 +27,12 @@ export default function CartItem({ item }: any) {
         mb: 2,
         p: 1.5,
         borderRadius: 3,
-
         backdropFilter: 'blur(12px)',
         backgroundColor: 'rgba(0,0,0,0.75)',
         color: '#fff',
         border: '1px solid rgba(255,255,255,0.08)',
         boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-
         transition: 'all 0.2s ease',
-
         '&:active': {
           transform: 'scale(0.98)'
         }
@@ -43,7 +41,7 @@ export default function CartItem({ item }: any) {
       {/* 🖼 IMMAGINE */}
       <Box
         component="img"
-        src={item.img || '/placeholder.png'}
+        src={item.image || '/placeholder.png'}
         alt={item.name}
         sx={{
           width: 80,
@@ -83,40 +81,37 @@ export default function CartItem({ item }: any) {
 
             {/* 📝 NOTE */}
             {editing ? (
-                <TextField
+              <TextField
                 fullWidth
                 size="small"
                 value={noteValue}
                 onChange={(e) => setNoteValue(e.target.value)}
                 onBlur={() => {
-                    dispatch(updateNote({ id: item.id, notes: noteValue }))
-                    setEditing(false)
+                  dispatch(updateNote({ id: item.id, notes: noteValue }))
+                  setEditing(false)
                 }}
                 onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                  if (e.key === 'Enter') {
                     dispatch(updateNote({ id: item.id, notes: noteValue }))
                     setEditing(false)
-                    }
+                  }
                 }}
                 placeholder="nota"
                 autoFocus
                 sx={{
-                    mt: 0.5,
-
-                    '& .MuiInputBase-root': {
-                    backgroundColor: '#fff', // 🔥 sfondo bianco
+                  mt: 0.5,
+                  '& .MuiInputBase-root': {
+                    backgroundColor: '#fff',
                     borderRadius: 2
-                    },
-
-                    '& .MuiInputBase-input': {
-                    color: '#000' // 🔥 testo nero
-                    },
-
-                    '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none' // 🔥 niente bordo brutto
-                    }
+                  },
+                  '& .MuiInputBase-input': {
+                    color: '#000'
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    border: 'none'
+                  }
                 }}
-                />
+              />
             ) : (
               <Typography
                 onClick={() => setEditing(true)}
@@ -132,7 +127,7 @@ export default function CartItem({ item }: any) {
             )}
           </Box>
 
-          {/* 💰 PREZZO */}
+          {/* 💰 PREZZO FIXED */}
           <Typography
             sx={{
               fontWeight: 'bold',
@@ -140,7 +135,7 @@ export default function CartItem({ item }: any) {
               ml: 1
             }}
           >
-            {item.price * item.quantity}€
+            {formatPrice(item.price * item.quantity)}
           </Typography>
         </Box>
 
