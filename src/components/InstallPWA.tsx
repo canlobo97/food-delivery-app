@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Typography, IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
+import IosShareIcon from '@mui/icons-material/IosShare';
 
 export default function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
@@ -79,11 +80,23 @@ export default function InstallPWA() {
       {/* 🎨 testo */}
       <Box>
         {isIOS ? (
-          <Typography sx={{ fontSize: 14 }}>
-            📲 Installa l’app:
-            <br />
-            <b>Condividi → Aggiungi a Home</b>
-          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+              📲 Installa l’app
+            </Typography>
+
+            <Typography sx={{ fontSize: 13, opacity: 0.8 }}>
+              1. Tocca
+              <Box component="span" sx={{ mx: 0.5, verticalAlign: 'middle' }}>
+                <IosShareIcon fontSize="small" />
+              </Box>
+              in basso
+            </Typography>
+
+            <Typography sx={{ fontSize: 13, opacity: 0.8 }}>
+              2. Premi <b>"Aggiungi alla schermata Home"</b>
+            </Typography>
+          </Box>
         ) : (
           <Typography sx={{ fontSize: 14 }}>
             🚀 Installa EnjoyEat
