@@ -12,14 +12,15 @@ import { inputStyles } from '../styles/formStyles'
 import { useDispatch } from 'react-redux'
 import { showToast } from '../store/toastSlice'
 
-export default function Login() {
-  const [form, setForm] = useState({
-    email: '',
-    password: ''
-  })
-
+export default function Register() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+    confirmPassword: ''
+  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
@@ -28,16 +29,15 @@ export default function Login() {
     })
   }
 
-  const handleLogin = async () => {
-    if (!form.email || !form.password) {
-      dispatch(showToast({
-        message: 'Inserisci email e password',
-        type: 'warning'
-      }))
-      return
-    }
+  const isValid =
+    form.email &&
+    form.password.length >= 6 &&
+    form.password === form.confirmPassword
 
-    const { error } = await supabase.auth.signInWithPassword({
+  const handleSignup = async () => {
+    if (!isValid) return
+
+    const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password
     })
@@ -47,19 +47,33 @@ export default function Login() {
         message: error.message,
         type: 'error'
       }))
-    } else {
-      dispatch(showToast({
-        message: 'Login effettuato 🚀',
-        type: 'success'
-      }))
-      navigate('/')
+      return
     }
+
+    const user = data.user
+
+    if (user) {
+      await supabase.from('profiles').insert([
+        {
+          id: user.id,
+          email: user.email,
+          role: 'user'
+        }
+      ])
+    }
+
+    dispatch(showToast({
+      message: 'Controlla la tua email 📩',
+      type: 'warning'
+    }))
+
+    navigate('/login')
   }
 
   return (
     <Container maxWidth="xs" sx={{ mt: 6 }}>
       <Typography variant="h4" gutterBottom>
-        Login 🔐
+        Registrati ✨
       </Typography>
 
       <Box
@@ -77,7 +91,6 @@ export default function Login() {
         <TextField
           label="Email"
           name="email"
-          type="email"
           value={form.email}
           onChange={handleChange}
           fullWidth
@@ -94,28 +107,35 @@ export default function Login() {
           sx={inputStyles}
         />
 
+        <TextField
+          label="Conferma Password"
+          name="confirmPassword"
+          type="password"
+          value={form.confirmPassword}
+          onChange={handleChange}
+          fullWidth
+          sx={inputStyles}
+        />
+
         <Button
           variant="contained"
           size="large"
-          onClick={handleLogin}
+          disabled={!isValid}
+          onClick={handleSignup}
           sx={{
             mt: 2,
             height: 50,
             fontWeight: 'bold',
             textTransform: 'none',
-            background: 'linear-gradient(45deg, #ff416c, #ff4b2b)',
-            boxShadow: '0 6px 20px rgba(255,75,43,0.5)'
+            background: isValid
+              ? 'linear-gradient(45deg, #ff416c, #ff4b2b)'
+              : 'rgba(255,255,255,0.2)',
+            boxShadow: isValid
+              ? '0 6px 20px rgba(255,75,43,0.5)'
+              : 'none'
           }}
         >
-          Accedi
-        </Button>
-
-        <Button
-          variant="text"
-          onClick={() => navigate('/register')}
-          sx={{ color: '#fff' }}
-        >
-          Non hai un account? Registrati
+          Registrati
         </Button>
       </Box>
     </Container>
