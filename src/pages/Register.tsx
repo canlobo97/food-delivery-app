@@ -34,41 +34,29 @@ export default function Register() {
     form.password.length >= 6 &&
     form.password === form.confirmPassword
 
-  const handleSignup = async () => {
+    const handleSignup = async () => {
     if (!isValid) return
 
-    const { data, error } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password
+    const { error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password
     })
 
     if (error) {
-      dispatch(showToast({
+        dispatch(showToast({
         message: error.message,
         type: 'error'
-      }))
-      return
-    }
-
-    const user = data.user
-
-    if (user) {
-      await supabase.from('profiles').insert([
-        {
-          id: user.id,
-          email: user.email,
-          role: 'user'
-        }
-      ])
+        }))
+        return
     }
 
     dispatch(showToast({
-      message: 'Controlla la tua email 📩',
-      type: 'warning'
+        message: 'Controlla la tua email 📩',
+        type: 'warning'
     }))
 
     navigate('/login')
-  }
+    }
 
   return (
     <Container maxWidth="xs" sx={{ mt: 6 }}>
