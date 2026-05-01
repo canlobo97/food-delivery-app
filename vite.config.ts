@@ -20,12 +20,12 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/pwapro.png',
+            src: '/EnjoyEatPro.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/pwapro.png',
+            src: '/EnjoyEatPro.png',
             sizes: '512x512',
             type: 'image/png'
           }
