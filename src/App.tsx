@@ -1,7 +1,6 @@
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Navbar from './components/layout/Navbar'
-import Home from './pages/Home'
 import Menu from './pages/Menu'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
