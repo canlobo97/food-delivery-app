@@ -4,21 +4,31 @@ import {
   Container,
   Typography,
   Box,
-  Button,
   TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
+  IconButton,
+  Button,
+  SwipeableDrawer
 } from '@mui/material'
+import FilterListIcon from '@mui/icons-material/FilterList'
 import { useDispatch } from 'react-redux'
 import { showToast } from '../store/toastSlice'
 import OrderDialog from '../components/OrderDialog'
-import { formatPrice } from '../utils/format'
+import { inputStyles, selectStyle } from '../styles/formStyles'
+import OrderCard from '../components/OrderCard'
+import AdminDashboard from '../components/AdminDashboard'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { useTheme } from '@mui/material/styles'
+import MobileSelect from '../components/layout/MobileSelect'
 
 export default function Admin() {
   const [orders, setOrders] = useState<any[]>([])
-  const [incomingOrders, setIncomingOrders] = useState<any[]>([]) // 🔥 QUEUE
+  const [incomingOrders, setIncomingOrders] = useState<any[]>([])
+  const [openFilters, setOpenFilters] = useState(false)
+
   const [filters, setFilters] = useState({
     status: '',
     name: '',
@@ -27,24 +37,19 @@ export default function Admin() {
   })
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
-
   const dispatch = useDispatch()
 
-  const totalRevenue = orders.reduce(
-    (sum, order) => sum + order.total,
-    0
-  )
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const updateStatus = async (orderId: string, newStatus: string) => {
-    const { error } = await supabase
+    await supabase
       .from('orders')
       .update({ status: newStatus })
       .eq('id', orderId)
-
-    if (error) console.error(error)
   }
 
-  // 🔊 INIT AUDIO LOOP
+  // 🔊 AUDIO INIT
   useEffect(() => {
     const audio = new Audio('/ding.wav')
     audio.loop = true
@@ -52,7 +57,7 @@ export default function Admin() {
     audioRef.current = audio
   }, [])
 
-  // 🔊 GESTIONE AUDIO
+  // 🔊 AUDIO CONTROL
   useEffect(() => {
     if (!audioRef.current) return
 
@@ -65,38 +70,28 @@ export default function Admin() {
     }
   }, [incomingOrders])
 
-  // 🔥 ORDINE CORRENTE (PIÙ VECCHIO)
   const currentOrder =
     incomingOrders.length > 0
       ? incomingOrders[incomingOrders.length - 1]
       : null
 
+  // 🔥 FETCH + REALTIME
   useEffect(() => {
     const fetchOrders = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error(error)
-        return
-      }
-
       const all = data || []
 
-      // 🔥 ORDINI NON GESTITI → QUEUE
-      const pending = all.filter(
-        (o) => o.status === 'in_elaborazione'
+      setIncomingOrders(
+        all.filter((o) => o.status === 'in_elaborazione')
       )
 
-      // 📦 ORDINI NORMALI
-      const visible = all.filter(
-        (o) => o.status !== 'in_elaborazione'
+      setOrders(
+        all.filter((o) => o.status !== 'in_elaborazione')
       )
-
-      setIncomingOrders(pending)
-      setOrders(visible)
     }
 
     fetchOrders()
@@ -105,15 +100,8 @@ export default function Admin() {
       .channel('orders-channel')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'orders'
-        },
+        { event: '*', schema: 'public', table: 'orders' },
         (payload) => {
-          console.log('🔥 REALTIME EVENT:', payload)
-
-          // 🆕 NUOVO ORDINE
           if (payload.eventType === 'INSERT') {
             const newOrder = payload.new
 
@@ -131,26 +119,16 @@ export default function Admin() {
             )
           }
 
-          // 🔄 UPDATE
           if (payload.eventType === 'UPDATE') {
             const updated = payload.new
 
-            setOrders((prev) => {
-              const exists = prev.find((o) => o.id === updated.id)
-
-              if (updated.status === 'in_elaborazione') return prev
-
-              if (exists) {
-                return prev.map((o) =>
-                  o.id === updated.id ? updated : o
-                )
-              }
-
-              return [updated, ...prev]
-            })
+            setOrders((prev) =>
+              prev.map((o) =>
+                o.id === updated.id ? updated : o
+              )
+            )
           }
 
-          // 🗑 DELETE
           if (payload.eventType === 'DELETE') {
             setOrders((prev) =>
               prev.filter((o) => o.id !== payload.old.id)
@@ -165,25 +143,15 @@ export default function Admin() {
     }
   }, [])
 
-  // ✅ ACCEPT
   const handleAccept = async (order: any) => {
-    await supabase
-      .from('orders')
-      .update({ status: 'in_preparazione' })
-      .eq('id', order.id)
-
+    await updateStatus(order.id, 'in_preparazione')
     setIncomingOrders((prev) =>
       prev.filter((o) => o.id !== order.id)
     )
   }
 
-  // ❌ REJECT
   const handleReject = async (order: any) => {
-    await supabase
-      .from('orders')
-      .update({ status: 'cancellato' })
-      .eq('id', order.id)
-
+    await updateStatus(order.id, 'cancellato')
     setIncomingOrders((prev) =>
       prev.filter((o) => o.id !== order.id)
     )
@@ -191,211 +159,227 @@ export default function Admin() {
 
   // 🔍 FILTRI
   const filteredOrders = orders.filter((order) => {
-    const matchStatus =
-      !filters.status || order.status === filters.status
-
-    const matchName =
-      !filters.name ||
-      order.customer?.name
-        ?.toLowerCase()
-        .includes(filters.name.toLowerCase())
-
-    const matchPhone =
-      !filters.phone ||
-      order.customer?.phone?.includes(filters.phone)
-
-    const matchDate =
-      !filters.date ||
-      new Date(order.created_at)
-        .toLocaleDateString()
-        .includes(filters.date)
-
-    return matchStatus && matchName && matchPhone && matchDate
+    return (
+      (!filters.status || order.status === filters.status) &&
+      (!filters.name ||
+        order.customer?.name
+          ?.toLowerCase()
+          .includes(filters.name.toLowerCase())) &&
+      (!filters.phone ||
+        order.customer?.phone?.includes(filters.phone)) &&
+      (!filters.date ||
+        new Date(order.created_at)
+          .toLocaleDateString()
+          .includes(filters.date))
+    )
   })
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h4">
-        Admin Panel 🔥
-      </Typography>
+    <Container sx={{ mt: 4, pb: 10 }}>
+      {/* HEADER */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
+      >
+        <Typography variant="h4">
+          Admin Panel 🔥
+        </Typography>
+
+        <IconButton
+          onClick={() => setOpenFilters(true)}
+          sx={{
+            background: 'linear-gradient(45deg,#ff416c,#ff4b2b)',
+            color: '#fff'
+          }}
+        >
+          <FilterListIcon />
+        </IconButton>
+      </Box>
 
       {/* 🔔 NOTIFICA */}
       {incomingOrders.length > 0 && (
-        <Typography color="error" sx={{ mt: 2 }}>
+        <Typography sx={{ mt: 2, color: '#ff4b2b' }}>
           🔔 {incomingOrders.length} nuovi ordini
         </Typography>
       )}
 
-      {/* 📊 STATS */}
-      <Box sx={{ display: 'flex', gap: 4, mt: 3 }}>
-        <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: 2 }}>
-          <Typography variant="h6">💸 Entrate totali</Typography>
-          <Typography variant="h5">{formatPrice(totalRevenue)}</Typography>
-        </Box>
+      {/* 📊 DASHBOARD */}
+      <AdminDashboard orders={orders} />
 
-        <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: 2 }}>
-          <Typography variant="h6">📦 Ordini totali</Typography>
-          <Typography variant="h5">{orders.length}</Typography>
-        </Box>
-      </Box>
+      {/* 📦 ORDINI */}
+      {filteredOrders.map((order) => (
+        <OrderCard
+          key={order.id}
+          order={order}
+          onUpdateStatus={updateStatus}
+        />
+      ))}
 
-      {/* 🔍 FILTRI */}
-      <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap' }}>
-        <FormControl sx={{ minWidth: 180 }}>
-          <InputLabel>Stato</InputLabel>
-          <Select
-            value={filters.status}
-            label="Stato"
-            onChange={(e) =>
-              setFilters({ ...filters, status: e.target.value })
+      {/* 🔥 FILTRI - SWIPEABLE */}
+      <SwipeableDrawer
+        anchor={isMobile ? 'bottom' : 'right'}
+        open={openFilters}
+        onClose={() => setOpenFilters(false)}
+        onOpen={() => {}}
+        disableSwipeToOpen={true}
+        swipeAreaWidth={20}
+        slotProps={{
+          paper: {
+            sx: {
+              borderTopLeftRadius: isMobile ? 20 : 0,
+              borderTopRightRadius: isMobile ? 20 : 0,
+              overflowX: 'hidden'
             }
-          >
-            <MenuItem value="">Tutti</MenuItem>
-            <MenuItem value="in_preparazione">In preparazione</MenuItem>
-            <MenuItem value="in_consegna">In consegna</MenuItem>
-            <MenuItem value="consegnato">Consegnato</MenuItem>
-          </Select>
-        </FormControl>
-
-        <TextField
-          label="Nome cliente"
-          value={filters.name}
-          onChange={(e) =>
-            setFilters({ ...filters, name: e.target.value })
           }
-        />
-
-        <TextField
-          label="Telefono"
-          value={filters.phone}
-          onChange={(e) =>
-            setFilters({ ...filters, phone: e.target.value })
-          }
-        />
-
-        <TextField
-          label="Data"
-          value={filters.date}
-          onChange={(e) =>
-            setFilters({ ...filters, date: e.target.value })
-          }
-        />
-      </Box>
-
-      {/* 📦 LISTA */}
-      {filteredOrders.length === 0 ? (
-        <Typography sx={{ mt: 2 }}>
-          Nessun ordine trovato
-        </Typography>
-      ) : (
-        filteredOrders.map((order) => (
+        }}
+      >
           <Box
-            key={order.id}
             sx={{
-              border: '1px solid #ccc',
-              borderRadius: 2,
-              p: 2,
-              mt: 2
+              width: '100%',
+              maxWidth: isMobile ? '100%' : 300,
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              background: '#1c1c1e',
+              height: isMobile ? 'auto' : '100%',
+              color: '#fff',
+
+              overflowX: 'hidden',
+              touchAction: 'pan-y',
+              boxSizing: 'border-box',
+              paddingBottom: "3rem"
             }}
           >
-            <Typography variant="h6">
-              Totale: {formatPrice(order.total)}
-            </Typography>
+          {/* HANDLE MOBILE */}
+          {isMobile && (
+            <Box
+              sx={{
+                width: 80,
+                height: 6,
+                background: 'rgba(255,255,255,0.4)',
+                borderRadius: 10,
+                alignSelf: 'center',
+                mb: 2
+              }}
+            />
+          )}
 
-            <Typography sx={{ mt: 1 }}>
-              Stato:{' '}
-              <span
-                style={{
-                  color:
-                    order.status === 'in_preparazione'
-                      ? 'orange'
-                      : order.status === 'in_consegna'
-                      ? 'blue'
-                      : 'green',
-                  fontWeight: 'bold'
+          <Typography variant="h6">
+            Filtri 🔍
+          </Typography>
+
+          {isMobile ? (
+            <MobileSelect
+              label="Stato"
+              value={filters.status}
+              onChange={(val) =>
+                setFilters({ ...filters, status: val })
+              }
+              options={[
+                { label: 'Tutti', value: '' },
+                { label: 'Preparazione', value: 'in_preparazione' },
+                { label: 'Consegna', value: 'in_consegna' },
+                { label: 'Consegnato', value: 'consegnato' },
+                { label: 'Cancellato', value: 'cancellato' }
+              ]}
+            />
+          ) : (
+            <FormControl sx={{ minWidth: 160 }}>
+              <InputLabel>Stato</InputLabel>
+
+              <Select
+                value={filters.status}
+                label="Stato"
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    status: e.target.value
+                  })
+                }
+                sx={selectStyle}
+                MenuProps={{
+                  slotProps: {
+                    paper: {
+                      sx: {
+                        backgroundColor: '#1c1c1e',
+                        color: '#fff'
+                      }
+                    }
+                  }
                 }}
               >
-                {order.status}
-              </span>
-            </Typography>
+                <MenuItem value="">Tutti</MenuItem>
+                <MenuItem value="in_preparazione">Preparazione</MenuItem>
+                <MenuItem value="in_consegna">Consegna</MenuItem>
+                <MenuItem value="consegnato">Consegnato</MenuItem>
+                <MenuItem value="cancellato">Cancellato</MenuItem>
+              </Select>
+            </FormControl>
+          )}
 
-            <Typography>
-              Data: {new Date(order.created_at).toLocaleString()}
-            </Typography>
+          <TextField
+            label="Nome"
+            value={filters.name}
+            onChange={(e) =>
+              setFilters({ ...filters, name: e.target.value })
+            }
+            sx={inputStyles}
+          />
 
-            <Typography sx={{ mt: 1 }}>
-              Cliente: {order.customer?.name}
-            </Typography>
+          <TextField
+            label="Telefono"
+            value={filters.phone}
+            onChange={(e) =>
+              setFilters({ ...filters, phone: e.target.value })
+            }
+            sx={inputStyles}
+          />
 
-            <Typography>
-              Indirizzo: {order.customer?.address}
-            </Typography>
+          <TextField
+            label="Data"
+            value={filters.date}
+            onChange={(e) =>
+              setFilters({ ...filters, date: e.target.value })
+            }
+            sx={inputStyles}
+          />
 
-            <Typography>
-              Telefono: {order.customer?.phone}
-            </Typography>
+          {/* ACTIONS */}
+          <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() =>
+                setFilters({
+                  status: '',
+                  name: '',
+                  phone: '',
+                  date: ''
+                })
+              }
+            >
+              Reset
+            </Button>
 
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1">
-                Prodotti:
-              </Typography>
-
-              {order.items?.map((item: any) => (
-                <Box
-                  key={item.id}
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid #eee',
-                    py: 1
-                  }}
-                >
-                  <Typography>
-                    {item.name} x {item.quantity}
-                  </Typography>
-
-                  <Typography>
-                    {item.price * item.quantity}€
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-
-            <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-              {order.status === 'in_preparazione' && (
-                <Button
-                  variant="contained"
-                  onClick={() =>
-                    updateStatus(order.id, 'in_consegna')
-                  }
-                >
-                  🚚 Passa a consegna
-                </Button>
-              )}
-
-              {order.status === 'in_consegna' && (
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={() =>
-                    updateStatus(order.id, 'consegnato')
-                  }
-                >
-                  ✅ Segna consegnato
-                </Button>
-              )}
-
-              {order.status === 'consegnato' && (
-                <Typography color="green">
-                  ✔ Consegnato
-                </Typography>
-              )}
-            </Box>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => setOpenFilters(false)}
+              sx={{
+                background: 'linear-gradient(45deg,#ff416c,#ff4b2b)'
+              }}
+            >
+              Risultati {filteredOrders.length}
+            </Button>
           </Box>
-        ))
-      )}
+        </Box>
+      </SwipeableDrawer>
 
-      {/* 🔥 POPUP */}
+      {/* 🔥 POPUP ORDINI */}
       <OrderDialog
         order={currentOrder}
         onAccept={handleAccept}
