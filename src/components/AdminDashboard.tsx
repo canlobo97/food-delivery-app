@@ -13,8 +13,8 @@ import { formatPrice } from '../utils/format'
 
 export default function AdminDashboard({ orders }: { orders: any[] }) {
   const delivered = orders.filter(o => o.status === 'consegnato')
-  const inDelivery = orders.filter(o => o.status === 'in_consegna')
-  const preparing = orders.filter(o => o.status === 'in_preparazione')
+  // const inDelivery = orders.filter(o => o.status === 'in_consegna')
+  // const preparing = orders.filter(o => o.status === 'in_preparazione')
 
   const totalRevenue = delivered.reduce((sum, o) => sum + o.total, 0)
 
