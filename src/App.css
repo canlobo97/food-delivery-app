@@ -1,6 +1,8 @@
 html, body {
   touch-action: manipulation;
   overscroll-behavior: none;
+  margin: 0;
+  background-color: rgba(255, 228, 196, 0.319);
 }
 
 input,

@@ -10,7 +10,7 @@ import ProtectedRoute from './components/control/ProtectedRoute'
 import Admin from './pages/Admin'
 import AdminRoute from './components/control/AdminRoute'
 import GlobalToast from './components/GlobalToast'
-import InstallPWA from './components/InstallPWA'
+import InstallPWA from './components/layout/InstallPWA'
 import FloatingCart from './components/FloatingCart'
 
 function App() {
