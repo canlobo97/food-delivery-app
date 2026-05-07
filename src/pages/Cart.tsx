@@ -23,7 +23,7 @@ export default function Cart() {
   )
 
   return (
-    <Container sx={{ mt: 4, pb: 20 }}>
+    <Container sx={{ mt: 4, pb: 24 }}>
       {/* 🔥 HEADER */}
       <Box
         sx={{

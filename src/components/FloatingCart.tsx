@@ -40,6 +40,10 @@ export default function FloatingCart() {
   }, [totalItems])
 
   if (location.pathname === '/cart') return null
+  if (location.pathname === '/login') return null
+  if (location.pathname === '/admin') return null
+  if (location.pathname === '/register') return null
+  
   if (totalItems === 0) return null
 
   return (
