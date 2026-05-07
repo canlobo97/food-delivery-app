@@ -29,7 +29,6 @@ export default function Menu() {
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const tabsRef = useRef<HTMLDivElement | null>(null)
   const tabItemRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const indicatorRef = useRef<HTMLDivElement | null>(null)
 
   // 🔥 FETCH
   useEffect(() => {
