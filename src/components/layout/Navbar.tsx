@@ -42,7 +42,13 @@ export default function Navbar() {
           backgroundColor: 'rgba(0,0,0,0.8)'
         }}
       >
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Toolbar
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            minHeight: { xs: 56, md: 64 } // 👈 IMPORTANTE
+          }}
+        >
           {/* LOGO */}
           <Typography
             variant="h6"

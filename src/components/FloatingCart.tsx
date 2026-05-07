@@ -47,7 +47,7 @@ export default function FloatingCart() {
       onClick={() => navigate('/cart')}
       sx={{
         position: 'fixed',
-        top: 80,
+        top: 120,
         right: 20,
         zIndex: 1000,
 
