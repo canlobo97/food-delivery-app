@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+
 import {
   Container,
   Typography,
@@ -13,16 +14,21 @@ import {
   Button,
   SwipeableDrawer
 } from '@mui/material'
+
 import FilterListIcon from '@mui/icons-material/FilterList'
+
 import { useDispatch } from 'react-redux'
 import { showToast } from '../store/toastSlice'
+
 import OrderDialog from '../components/OrderDialog'
-import { inputStyles, selectStyle } from '../styles/formStyles'
 import OrderCard from '../components/OrderCard'
 import AdminDashboard from '../components/AdminDashboard'
+import MobileSelect from '../components/layout/MobileSelect'
+
+import { inputStyles, selectStyle } from '../styles/formStyles'
+
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useTheme } from '@mui/material/styles'
-import MobileSelect from '../components/layout/MobileSelect'
 
 export default function Admin() {
   const [orders, setOrders] = useState<any[]>([])
@@ -37,12 +43,20 @@ export default function Admin() {
   })
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
+
   const dispatch = useDispatch()
 
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-  const updateStatus = async (orderId: string, newStatus: string) => {
+  const isMobile = useMediaQuery(
+    theme.breakpoints.down('sm')
+  )
+
+  // 🔥 UPDATE STATUS
+  const updateStatus = async (
+    orderId: string,
+    newStatus: string
+  ) => {
     await supabase
       .from('orders')
       .update({ status: newStatus })
@@ -52,8 +66,10 @@ export default function Admin() {
   // 🔊 AUDIO INIT
   useEffect(() => {
     const audio = new Audio('/ding.wav')
+
     audio.loop = true
     audio.volume = 1
+
     audioRef.current = audio
   }, [])
 
@@ -66,6 +82,7 @@ export default function Admin() {
       audioRef.current.currentTime = 0
     } else if (audioRef.current.paused) {
       audioRef.current.currentTime = 0
+
       audioRef.current.play().catch(() => {})
     }
   }, [incomingOrders])
@@ -81,16 +98,22 @@ export default function Admin() {
       const { data } = await supabase
         .from('orders')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('created_at', {
+          ascending: false
+        })
 
       const all = data || []
 
       setIncomingOrders(
-        all.filter((o) => o.status === 'in_elaborazione')
+        all.filter(
+          (o) => o.status === 'in_elaborazione'
+        )
       )
 
       setOrders(
-        all.filter((o) => o.status !== 'in_elaborazione')
+        all.filter(
+          (o) => o.status !== 'in_elaborazione'
+        )
       )
     }
 
@@ -100,15 +123,29 @@ export default function Admin() {
       .channel('orders-channel')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders'
+        },
         (payload) => {
+          // 🔥 INSERT
           if (payload.eventType === 'INSERT') {
             const newOrder = payload.new
 
-            if (newOrder.status === 'in_elaborazione') {
-              setIncomingOrders((prev) => [newOrder, ...prev])
+            if (
+              newOrder.status ===
+              'in_elaborazione'
+            ) {
+              setIncomingOrders((prev) => [
+                newOrder,
+                ...prev
+              ])
             } else {
-              setOrders((prev) => [newOrder, ...prev])
+              setOrders((prev) => [
+                newOrder,
+                ...prev
+              ])
             }
 
             dispatch(
@@ -119,19 +156,71 @@ export default function Admin() {
             )
           }
 
+          // 🔥 UPDATE
           if (payload.eventType === 'UPDATE') {
             const updated = payload.new
 
-            setOrders((prev) =>
-              prev.map((o) =>
-                o.id === updated.id ? updated : o
+            // rimuovi sempre da incoming
+            setIncomingOrders((prev) =>
+              prev.filter(
+                (o) => o.id !== updated.id
               )
             )
+
+            // se torna in elaborazione
+            if (
+              updated.status ===
+              'in_elaborazione'
+            ) {
+              setIncomingOrders((prev) => {
+                const exists = prev.some(
+                  (o) => o.id === updated.id
+                )
+
+                if (exists) {
+                  return prev.map((o) =>
+                    o.id === updated.id
+                      ? updated
+                      : o
+                  )
+                }
+
+                return [updated, ...prev]
+              })
+
+              return
+            }
+
+            // aggiorna/add orders
+            setOrders((prev) => {
+              const exists = prev.some(
+                (o) => o.id === updated.id
+              )
+
+              if (exists) {
+                return prev.map((o) =>
+                  o.id === updated.id
+                    ? updated
+                    : o
+                )
+              }
+
+              return [updated, ...prev]
+            })
           }
 
+          // 🔥 DELETE
           if (payload.eventType === 'DELETE') {
+            setIncomingOrders((prev) =>
+              prev.filter(
+                (o) => o.id !== payload.old.id
+              )
+            )
+
             setOrders((prev) =>
-              prev.filter((o) => o.id !== payload.old.id)
+              prev.filter(
+                (o) => o.id !== payload.old.id
+              )
             )
           }
         }
@@ -141,38 +230,53 @@ export default function Admin() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [dispatch])
 
-  const handleAccept = async (order: any) => {
-    await updateStatus(order.id, 'in_preparazione')
-    setIncomingOrders((prev) =>
-      prev.filter((o) => o.id !== order.id)
+  // ✅ ACCEPT
+  const handleAccept = async (
+    order: any
+  ) => {
+    await updateStatus(
+      order.id,
+      'in_preparazione'
     )
   }
 
-  const handleReject = async (order: any) => {
-    await updateStatus(order.id, 'cancellato')
-    setIncomingOrders((prev) =>
-      prev.filter((o) => o.id !== order.id)
+  // ❌ REJECT
+  const handleReject = async (
+    order: any
+  ) => {
+    await updateStatus(
+      order.id,
+      'cancellato'
     )
   }
 
-  // 🔍 FILTRI
-  const filteredOrders = orders.filter((order) => {
-    return (
-      (!filters.status || order.status === filters.status) &&
-      (!filters.name ||
-        order.customer?.name
-          ?.toLowerCase()
-          .includes(filters.name.toLowerCase())) &&
-      (!filters.phone ||
-        order.customer?.phone?.includes(filters.phone)) &&
-      (!filters.date ||
-        new Date(order.created_at)
-          .toLocaleDateString()
-          .includes(filters.date))
-    )
-  })
+  // 🔍 FILTERS
+  const filteredOrders = orders.filter(
+    (order) => {
+      return (
+        (!filters.status ||
+          order.status === filters.status) &&
+        (!filters.name ||
+          order.customer?.name
+            ?.toLowerCase()
+            .includes(
+              filters.name.toLowerCase()
+            )) &&
+        (!filters.phone ||
+          order.customer?.phone?.includes(
+            filters.phone
+          )) &&
+        (!filters.date ||
+          new Date(
+            order.created_at
+          )
+            .toLocaleDateString()
+            .includes(filters.date))
+      )
+    }
+  )
 
   return (
     <Container sx={{ mt: 4, pb: 10 }}>
@@ -189,9 +293,13 @@ export default function Admin() {
         </Typography>
 
         <IconButton
-          onClick={() => setOpenFilters(true)}
+          onClick={() =>
+            setOpenFilters(true)
+          }
           sx={{
-            background: 'linear-gradient(45deg,#ff416c,#ff4b2b)',
+            background:
+              'linear-gradient(45deg,#ff416c,#ff4b2b)',
+
             color: '#fff'
           }}
         >
@@ -201,8 +309,14 @@ export default function Admin() {
 
       {/* 🔔 NOTIFICA */}
       {incomingOrders.length > 0 && (
-        <Typography sx={{ mt: 2, color: '#ff4b2b' }}>
-          🔔 {incomingOrders.length} nuovi ordini
+        <Typography
+          sx={{
+            mt: 2,
+            color: '#ff4b2b'
+          }}
+        >
+          🔔 {incomingOrders.length} nuovi
+          ordini
         </Typography>
       )}
 
@@ -218,51 +332,75 @@ export default function Admin() {
         />
       ))}
 
-      {/* 🔥 FILTRI - SWIPEABLE */}
+      {/* 🔥 FILTRI */}
       <SwipeableDrawer
         anchor={isMobile ? 'bottom' : 'right'}
         open={openFilters}
-        onClose={() => setOpenFilters(false)}
+        onClose={() =>
+          setOpenFilters(false)
+        }
         onOpen={() => {}}
         disableSwipeToOpen={true}
         swipeAreaWidth={20}
         slotProps={{
           paper: {
             sx: {
-              borderTopLeftRadius: isMobile ? 20 : 0,
-              borderTopRightRadius: isMobile ? 20 : 0,
+              borderTopLeftRadius:
+                isMobile ? 20 : 0,
+
+              borderTopRightRadius:
+                isMobile ? 20 : 0,
+
               overflowX: 'hidden'
             }
           }
         }}
       >
-          <Box
-            sx={{
-              width: '100%',
-              maxWidth: isMobile ? '100%' : 300,
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              background: '#1c1c1e',
-              height: isMobile ? 'auto' : '100%',
-              color: '#fff',
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: isMobile
+              ? '100%'
+              : 300,
 
-              overflowX: 'hidden',
-              touchAction: 'pan-y',
-              boxSizing: 'border-box',
-              paddingBottom: "3rem"
-            }}
-          >
+            p: 3,
+
+            display: 'flex',
+            flexDirection: 'column',
+
+            gap: 2,
+
+            background: '#1c1c1e',
+
+            height: isMobile
+              ? 'auto'
+              : '100%',
+
+            color: '#fff',
+
+            overflowX: 'hidden',
+
+            touchAction: 'pan-y',
+
+            boxSizing: 'border-box',
+
+            paddingBottom: '3rem'
+          }}
+        >
           {/* HANDLE MOBILE */}
           {isMobile && (
             <Box
               sx={{
                 width: 80,
                 height: 6,
-                background: 'rgba(255,255,255,0.4)',
+
+                background:
+                  'rgba(255,255,255,0.4)',
+
                 borderRadius: 10,
+
                 alignSelf: 'center',
+
                 mb: 2
               }}
             />
@@ -277,19 +415,42 @@ export default function Admin() {
               label="Stato"
               value={filters.status}
               onChange={(val) =>
-                setFilters({ ...filters, status: val })
+                setFilters({
+                  ...filters,
+                  status: val
+                })
               }
               options={[
-                { label: 'Tutti', value: '' },
-                { label: 'Preparazione', value: 'in_preparazione' },
-                { label: 'Consegna', value: 'in_consegna' },
-                { label: 'Consegnato', value: 'consegnato' },
-                { label: 'Cancellato', value: 'cancellato' }
+                {
+                  label: 'Tutti',
+                  value: ''
+                },
+                {
+                  label: 'Preparazione',
+                  value:
+                    'in_preparazione'
+                },
+                {
+                  label: 'Consegna',
+                  value: 'in_consegna'
+                },
+                {
+                  label: 'Consegnato',
+                  value: 'consegnato'
+                },
+                {
+                  label: 'Cancellato',
+                  value: 'cancellato'
+                }
               ]}
             />
           ) : (
-            <FormControl sx={{ minWidth: 160 }}>
-              <InputLabel>Stato</InputLabel>
+            <FormControl
+              sx={{ minWidth: 160 }}
+            >
+              <InputLabel>
+                Stato
+              </InputLabel>
 
               <Select
                 value={filters.status}
@@ -297,7 +458,8 @@ export default function Admin() {
                 onChange={(e) =>
                   setFilters({
                     ...filters,
-                    status: e.target.value
+                    status:
+                      e.target.value
                   })
                 }
                 sx={selectStyle}
@@ -305,18 +467,34 @@ export default function Admin() {
                   slotProps: {
                     paper: {
                       sx: {
-                        backgroundColor: '#1c1c1e',
+                        backgroundColor:
+                          '#1c1c1e',
+
                         color: '#fff'
                       }
                     }
                   }
                 }}
               >
-                <MenuItem value="">Tutti</MenuItem>
-                <MenuItem value="in_preparazione">Preparazione</MenuItem>
-                <MenuItem value="in_consegna">Consegna</MenuItem>
-                <MenuItem value="consegnato">Consegnato</MenuItem>
-                <MenuItem value="cancellato">Cancellato</MenuItem>
+                <MenuItem value="">
+                  Tutti
+                </MenuItem>
+
+                <MenuItem value="in_preparazione">
+                  Preparazione
+                </MenuItem>
+
+                <MenuItem value="in_consegna">
+                  Consegna
+                </MenuItem>
+
+                <MenuItem value="consegnato">
+                  Consegnato
+                </MenuItem>
+
+                <MenuItem value="cancellato">
+                  Cancellato
+                </MenuItem>
               </Select>
             </FormControl>
           )}
@@ -325,7 +503,10 @@ export default function Admin() {
             label="Nome"
             value={filters.name}
             onChange={(e) =>
-              setFilters({ ...filters, name: e.target.value })
+              setFilters({
+                ...filters,
+                name: e.target.value
+              })
             }
             sx={inputStyles}
           />
@@ -334,7 +515,10 @@ export default function Admin() {
             label="Telefono"
             value={filters.phone}
             onChange={(e) =>
-              setFilters({ ...filters, phone: e.target.value })
+              setFilters({
+                ...filters,
+                phone: e.target.value
+              })
             }
             sx={inputStyles}
           />
@@ -343,13 +527,22 @@ export default function Admin() {
             label="Data"
             value={filters.date}
             onChange={(e) =>
-              setFilters({ ...filters, date: e.target.value })
+              setFilters({
+                ...filters,
+                date: e.target.value
+              })
             }
             sx={inputStyles}
           />
 
           {/* ACTIONS */}
-          <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1,
+              mt: 2
+            }}
+          >
             <Button
               fullWidth
               variant="outlined"
@@ -368,12 +561,16 @@ export default function Admin() {
             <Button
               fullWidth
               variant="contained"
-              onClick={() => setOpenFilters(false)}
+              onClick={() =>
+                setOpenFilters(false)
+              }
               sx={{
-                background: 'linear-gradient(45deg,#ff416c,#ff4b2b)'
+                background:
+                  'linear-gradient(45deg,#ff416c,#ff4b2b)'
               }}
             >
-              Risultati {filteredOrders.length}
+              Risultati{' '}
+              {filteredOrders.length}
             </Button>
           </Box>
         </Box>
