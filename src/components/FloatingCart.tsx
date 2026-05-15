@@ -1,7 +1,6 @@
 import {
   Fab,
   Badge,
-  useMediaQuery
 } from '@mui/material'
 
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
@@ -22,8 +21,6 @@ import {
 export default function FloatingCart() {
   const navigate = useNavigate()
   const location = useLocation()
-
-  const isMobile = useMediaQuery('(max-width:768px)')
 
   const cartItems = useSelector(
     (state: any) => state.cart.items

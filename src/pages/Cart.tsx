@@ -8,7 +8,6 @@ import {
   Typography,
   Button,
   Box,
-  useMediaQuery
 } from '@mui/material'
 
 import CartItem from '../components/product/CartItem'
@@ -17,8 +16,6 @@ import { formatPrice } from '../utils/format'
 
 export default function Cart() {
   const dispatch = useDispatch<AppDispatch>()
-
-  const isMobile = useMediaQuery('(max-width:768px)')
 
   const cart = useSelector(
     (state: RootState) => state.cart.items
