@@ -7,19 +7,63 @@ export function useProducts() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let mounted = true
+
     const fetchProducts = async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
+      try {
+        setLoading(true)
 
-      if (error) console.error(error)
-      else setProducts(data || [])
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
 
-      setLoading(false)
+        if (error) {
+          console.error(error)
+          return
+        }
+
+        if (mounted) {
+          setProducts(data || [])
+        }
+      } catch (err) {
+        console.error('Products fetch error:', err)
+
+        if (mounted) {
+          setProducts([])
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
     }
 
     fetchProducts()
+
+    // 🔥 refetch quando torni nella PWA
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchProducts()
+      }
+    }
+
+    document.addEventListener(
+      'visibilitychange',
+      handleVisibility
+    )
+
+    return () => {
+      mounted = false
+
+      document.removeEventListener(
+        'visibilitychange',
+        handleVisibility
+      )
+    }
   }, [])
 
-  return { products, loading }
+  return {
+    products,
+    loading
+  }
 }

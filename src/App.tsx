@@ -1,29 +1,63 @@
 import './App.css'
+
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Navbar from './components/layout/Navbar'
 import Menu from './pages/Menu'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
-import { Routes, Route } from 'react-router-dom'
+
+import {
+  Routes,
+  Route,
+  useLocation
+} from 'react-router-dom'
+
 import ProtectedRoute from './components/control/ProtectedRoute'
 import Admin from './pages/Admin'
 import AdminRoute from './components/control/AdminRoute'
+
 import GlobalToast from './components/GlobalToast'
 import InstallPWA from './components/layout/InstallPWA'
 import FloatingCart from './components/FloatingCart'
 
 function App() {
+  const location = useLocation()
+
   return (
     <>
       <Navbar />
 
       <Routes>
-        <Route path="/" element={<Menu />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/menu" element={<Menu />} />
-        <Route path="/cart" element={<Cart />} />
+        <Route
+          path="/"
+          element={
+            <Menu key={location.key} />
+          }
+        />
+
+        <Route
+          path="/menu"
+          element={
+            <Menu key={location.key} />
+          }
+        />
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+        <Route
+          path="/cart"
+          element={<Cart />}
+        />
+
         <Route
           path="/checkout"
           element={
@@ -32,6 +66,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin"
           element={
@@ -41,6 +76,7 @@ function App() {
           }
         />
       </Routes>
+
       <GlobalToast />
       <InstallPWA />
       <FloatingCart />
