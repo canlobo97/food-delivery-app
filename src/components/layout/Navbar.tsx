@@ -2,255 +2,246 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
+  BottomNavigation,
+  BottomNavigationAction,
+  Paper,
   Box,
-  ListItemIcon
+  Button,
+  useMediaQuery
 } from '@mui/material'
-import MenuIcon from '@mui/icons-material/Menu'
+
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import LoginIcon from '@mui/icons-material/Login'
 import LogoutIcon from '@mui/icons-material/Logout'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import {
+  Link,
+  useLocation,
+  useNavigate
+} from 'react-router-dom'
+
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false)
+  const isMobile = useMediaQuery('(max-width:768px)')
+
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const { user, role } = useAuth()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    setOpen(false)
+    navigate('/menu')
   }
+
+  const currentTab = (() => {
+    if (location.pathname.includes('/cart')) return 'cart'
+    if (location.pathname.includes('/login')) return 'login'
+    if (location.pathname.includes('/admin')) return 'admin'
+
+    return 'menu'
+  })()
 
   return (
     <>
-      {/* 🔥 NAVBAR */}
-      <AppBar
-        position="fixed"
-        sx={{
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(0,0,0,0.8)'
-        }}
-      >
-        <Toolbar
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            minHeight: { xs: 56, md: 64 } // 👈 IMPORTANTE
-          }}
-        >
-          {/* LOGO */}
-          <Typography
-            variant="h6"
-            component={Link}
-            to="/"
+      {/* DESKTOP NAVBAR */}
+      {!isMobile && (
+        <>
+          <AppBar
+            position="sticky"
             sx={{
-              textDecoration: 'none',
-              color: 'white',
-              fontSize: { xs: '1.2rem', md: '1.6rem' } // 🔥 più grande desktop
+              backdropFilter: 'blur(10px)',
+              background: 'rgba(0,0,0,0.88)',
+              borderBottom:
+                '1px solid rgba(255,255,255,0.08)'
             }}
           >
-            EnjoyEat 🍔
-          </Typography>
-
-          {/* HAMBURGER */}
-          <IconButton
-            color="inherit"
-            onClick={() => setOpen(true)}
-            sx={{
-              transform: { md: 'scale(1.3)' } // 🔥 icona più grande desktop
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-
-      {/* 🔥 SPACER */}
-      <Toolbar />
-
-      {/* 🔥 OVERLAY BLUR */}
-      {open && (
-        <Box
-          onClick={() => setOpen(false)}
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 1200,
-            backdropFilter: 'blur(6px)',
-            backgroundColor: 'rgba(0,0,0,0.4)',
-            opacity: open ? 1 : 0,
-            transition: 'all 0.3s ease'
-          }}
-        />
-      )}
-
-      {/* 📱 DRAWER */}
-      <Drawer
-        anchor="right"
-        open={open}
-        onClose={() => setOpen(false)}
-        transitionDuration={300}
-        slotProps={{
-          paper: {
-            sx: {
-              width: { xs: 260, md: 320 }, // 🔥 più largo desktop
-              backdropFilter: 'blur(12px)',
-              backgroundColor: 'rgba(0,0,0,0.85)',
-              color: '#fff',
-              borderLeft: '1px solid rgba(255,255,255,0.1)'
-            }
-          }
-        }}
-      >
-        <Box sx={{ p: { xs: 2, md: 3 } }}>
-          {/*USER */}
-          {user && (
-            <Box
+            <Toolbar
               sx={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                mb: 3
+                justifyContent: 'space-between',
+                minHeight: 72
               }}
             >
-              <AccountCircleIcon
-                sx={{
-                  fontSize: { xs: 24, md: 28 }
-                }}
-              />
-
+              {/* LOGO */}
               <Typography
+                component={Link}
+                to="/menu"
                 sx={{
-                  fontSize: { xs: '1rem', md: '1.5rem' },
-                  fontWeight: 500
+                  color: '#fff',
+                  textDecoration: 'none',
+                  fontSize: '1.6rem',
+                  fontWeight: 'bold'
                 }}
               >
-                {user.email?.split('@')[0]}
+                EnjoyEat 🍔
               </Typography>
-            </Box>
-          )}
 
-          <List>
-            {/* MENU */}
-            <ListItem
-              component={Link}
-              to="/menu"
-              onClick={() => setOpen(false)}
-              sx={menuItemStyle}
-            >
-              <ListItemIcon sx={iconStyle}>
-                <RestaurantMenuIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Menu"
-                slotProps={{
-                  primary: {
-                    sx: textStyle
-                  }
+              {/* NAVIGATION */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5
                 }}
-              />
-            </ListItem>
+              >
+                <Button
+                  startIcon={<RestaurantMenuIcon />}
+                  component={Link}
+                  to="/menu"
+                  sx={desktopButtonStyle}
+                >
+                  Menu
+                </Button>
 
-            {/* ADMIN */}
+                <Button
+                  startIcon={<ShoppingCartIcon />}
+                  component={Link}
+                  to="/cart"
+                  sx={desktopButtonStyle}
+                >
+                  Carrello
+                </Button>
+
+                {role === 'admin' && (
+                  <Button
+                    startIcon={
+                      <AdminPanelSettingsIcon />
+                    }
+                    component={Link}
+                    to="/admin"
+                    sx={desktopButtonStyle}
+                  >
+                    Admin
+                  </Button>
+                )}
+
+                {user ? (
+                  <Button
+                    startIcon={<LogoutIcon />}
+                    onClick={handleLogout}
+                    sx={desktopButtonStyle}
+                  >
+                    Logout
+                  </Button>
+                ) : (
+                  <Button
+                    startIcon={<LoginIcon />}
+                    component={Link}
+                    to="/login"
+                    sx={desktopButtonStyle}
+                  >
+                    Login
+                  </Button>
+                )}
+              </Box>
+            </Toolbar>
+          </AppBar>
+        </>
+      )}
+
+      {/* MOBILE BOTTOM NAV */}
+      {isMobile && (
+        <Paper
+          elevation={0}
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+
+            
+            pb: 'max(env(safe-area-inset-bottom), 18px)',
+
+            backdropFilter: 'blur(12px)',
+            background: 'rgba(0,0,0,0.94)',
+
+            borderTop:
+              '1px solid rgba(255,255,255,0.08)'
+          }}
+        >
+          <BottomNavigation
+            value={currentTab}
+            showLabels
+            sx={{
+              background: 'transparent',
+              height: 55
+            }}
+          >
+            <BottomNavigationAction
+              label="Menu"
+              value="menu"
+              icon={<RestaurantMenuIcon />}
+              onClick={() => navigate('/menu')}
+              sx={mobileButtonStyle}
+            />
+
+            <BottomNavigationAction
+              label="Carrello"
+              value="cart"
+              icon={<ShoppingCartIcon />}
+              onClick={() => navigate('/cart')}
+              sx={mobileButtonStyle}
+            />
+
             {role === 'admin' && (
-              <ListItem
-                component={Link}
-                to="/admin"
-                onClick={() => setOpen(false)}
-                sx={menuItemStyle}
-              >
-                <ListItemIcon sx={iconStyle}>
-                  <AdminPanelSettingsIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Admin"
-                  slotProps={{
-                    primary: {
-                      sx: textStyle
-                    }
-                  }}
-                />
-              </ListItem>
+              <BottomNavigationAction
+                label="Admin"
+                value="admin"
+                icon={<AdminPanelSettingsIcon />}
+                onClick={() => navigate('/admin')}
+                sx={mobileButtonStyle}
+              />
             )}
 
-            {/* LOGIN / LOGOUT */}
             {user ? (
-              <ListItem onClick={handleLogout} sx={menuItemStyle}>
-                <ListItemIcon sx={iconStyle}>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Logout"
-                  slotProps={{
-                    primary: {
-                      sx: textStyle
-                    }
-                  }}
-                />
-              </ListItem>
+              <BottomNavigationAction
+                label="Logout"
+                value="logout"
+                icon={<LogoutIcon />}
+                onClick={handleLogout}
+                sx={mobileButtonStyle}
+              />
             ) : (
-              <ListItem
-                component={Link}
-                to="/login"
-                onClick={() => setOpen(false)}
-                sx={menuItemStyle}
-              >
-                <ListItemIcon sx={iconStyle}>
-                  <LoginIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Login"
-                  slotProps={{
-                    primary: {
-                      sx: textStyle
-                    }
-                  }}
-                />
-              </ListItem>
+              <BottomNavigationAction
+                label="Login"
+                value="login"
+                icon={<LoginIcon />}
+                onClick={() => navigate('/login')}
+                sx={mobileButtonStyle}
+              />
             )}
-          </List>
-        </Box>
-      </Drawer>
+          </BottomNavigation>
+        </Paper>
+      )}
     </>
   )
 }
 
-/* 🔥 STILI RIUTILIZZABILI */
-
-const menuItemStyle = {
-  borderRadius: 2,
-  mb: 1,
-  color: 'white',
+const desktopButtonStyle = {
+  color: '#fff',
+  fontWeight: 700,
+  textTransform: 'none',
+  borderRadius: '999px',
+  px: 2,
+  py: 1,
 
   '&:hover': {
-    backgroundColor: 'rgba(255,255,255,0.1)'
-  },
-
-  px: { xs: 1.5, md: 2.5 },
-  py: { xs: 1, md: 1.5 }
+    background:
+      'rgba(255,255,255,0.08)'
+  }
 }
 
-const iconStyle = {
-  color: 'white',
-  minWidth: 40,
-  transform: { md: 'scale(1.2)' } // 🔥 icone più grandi desktop
-}
+const mobileButtonStyle = {
+  color: '#fff',
+  pt: 1,
 
-const textStyle = {
-  fontSize: { xs: '0.95rem', md: '1.2rem' }, // 🔥 testo più grande desktop
-  fontWeight: 500
+  '&.Mui-selected': {
+    color: '#ff4b2b'
+  }
 }

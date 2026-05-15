@@ -4,8 +4,7 @@ import {
   Typography,
   Button,
   Slide,
-  IconButton,
-  Divider
+  IconButton
 } from '@mui/material'
 
 import CloseIcon from '@mui/icons-material/Close'
@@ -74,9 +73,9 @@ export default function OrderDialog({
       {order && (
         <Box
           sx={{
-            height: '100%',
+            minHeight: '100%',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
           }}
         >
           {/* HEADER */}
@@ -136,7 +135,8 @@ export default function OrderDialog({
             sx={{
               flex: 1,
               overflowY: 'auto',
-              p: 2
+              p: 2,
+              pb: 6
             }}
           >
             {/* CUSTOMER */}
@@ -333,69 +333,64 @@ export default function OrderDialog({
                 {formatPrice(order.total)}
               </Typography>
             </Box>
-          </Box>
 
-          <Divider
-            sx={{
-              borderColor:
-                'rgba(255,255,255,0.08)'
-            }}
-          />
-
-          {/* ACTIONS */}
-          <Box
-            sx={{
-              p: 2,
-              display: 'flex',
-              gap: 2,
-
-              backdropFilter: 'blur(12px)',
-              backgroundColor:
-                'rgba(0,0,0,0.7)'
-            }}
-          >
-            <Button
-              fullWidth
-              onClick={() => onReject(order)}
+            {/* ACTIONS */}
+            <Box
               sx={{
-                height: 56,
-                borderRadius: 4,
+                mt: 3,
 
-                background:
-                  'rgba(255,255,255,0.08)',
+                display: 'flex',
+                gap: 2,
 
-                color: '#fff',
-
-                fontWeight: 700,
-
-                '&:hover': {
-                  background:
-                    'rgba(255,255,255,0.12)'
+                pb: {
+                  xs: 'calc(24px + env(safe-area-inset-bottom))',
+                  md: 2
                 }
               }}
             >
-              ❌ Rifiuta
-            </Button>
+              <Button
+                fullWidth
+                onClick={() => onReject(order)}
+                sx={{
+                  height: 56,
+                  borderRadius: 4,
 
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={() => onAccept(order)}
-              sx={{
-                height: 56,
-                borderRadius: 4,
+                  background:
+                    'rgba(255,255,255,0.08)',
 
-                fontWeight: 700,
+                  color: '#fff',
 
-                background:
-                  'linear-gradient(45deg,#ff416c,#ff4b2b)',
+                  fontWeight: 700,
 
-                boxShadow:
-                  '0 8px 24px rgba(255,75,43,0.35)'
-              }}
-            >
-              ✅ Accetta
-            </Button>
+                  '&:hover': {
+                    background:
+                      'rgba(255,255,255,0.12)'
+                  }
+                }}
+              >
+                ❌ Rifiuta
+              </Button>
+
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => onAccept(order)}
+                sx={{
+                  height: 56,
+                  borderRadius: 4,
+
+                  fontWeight: 700,
+
+                  background:
+                    'linear-gradient(45deg,#ff416c,#ff4b2b)',
+
+                  boxShadow:
+                    '0 8px 24px rgba(255,75,43,0.35)'
+                }}
+              >
+                ✅ Accetta
+              </Button>
+            </Box>
           </Box>
         </Box>
       )}

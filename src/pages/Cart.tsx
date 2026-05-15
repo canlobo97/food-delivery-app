@@ -2,29 +2,47 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { clearCart } from '../store/cartSlice'
 import type { RootState, AppDispatch } from '../store/store'
+
 import {
   Container,
   Typography,
   Button,
-  Box
+  Box,
+  useMediaQuery
 } from '@mui/material'
+
 import CartItem from '../components/product/CartItem'
 
-// 🔥 IMPORT FORMAT
 import { formatPrice } from '../utils/format'
 
 export default function Cart() {
   const dispatch = useDispatch<AppDispatch>()
-  const cart = useSelector((state: RootState) => state.cart.items)
+
+  const isMobile = useMediaQuery('(max-width:768px)')
+
+  const cart = useSelector(
+    (state: RootState) => state.cart.items
+  )
 
   const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) =>
+      sum + item.price * item.quantity,
     0
   )
 
   return (
-    <Container sx={{ mt: 4, pb: 24 }}>
-      {/* 🔥 HEADER */}
+    <Container
+      sx={{
+        mt: 4,
+
+        // 🔥 spazio sotto per navbar + barra checkout
+        pb: {
+          xs: 38,
+          md: 24
+        }
+      }}
+    >
+      {/* HEADER */}
       <Box
         sx={{
           display: 'flex',
@@ -39,7 +57,9 @@ export default function Cart() {
 
         {cart.length > 0 && (
           <Button
-            onClick={() => dispatch(clearCart())}
+            onClick={() =>
+              dispatch(clearCart())
+            }
             sx={{
               color: '#ff4b2b',
               fontWeight: 'bold',
@@ -52,38 +72,62 @@ export default function Cart() {
       </Box>
 
       {cart.length === 0 ? (
-        <Typography>Il carrello è vuoto</Typography>
+        <Typography>
+          Il carrello è vuoto
+        </Typography>
       ) : (
         <>
           {cart.map((item) => (
-            <CartItem key={item.id} item={item} />
+            <CartItem
+              key={item.id}
+              item={item}
+            />
           ))}
 
-          {/* 🔥 STICKY BOTTOM BAR */}
+          {/* STICKY CHECKOUT BAR */}
           <Box
             sx={{
               position: 'fixed',
-              bottom: 0,
+
+              // 🔥 IMPORTANTISSIMO
+              // alza la barra sopra la bottom navbar mobile
+              bottom: {
+                xs: 'calc(73px + env(safe-area-inset-bottom))',
+                md: 0
+              },
+
               left: 0,
               width: '100%',
               zIndex: 2000,
+
               backdropFilter: 'blur(12px)',
-              backgroundColor: 'rgba(0,0,0,0.9)',
-              borderTop: '1px solid rgba(255,255,255,0.1)'
+              backgroundColor: 'rgb(0,0,0)',
+
+              borderTop:
+                '1px solid rgba(255,255,255,0.1)'
             }}
           >
-            {/* 👇 CONTENITORE CENTRATO */}
             <Box
               sx={{
                 maxWidth: 600,
                 mx: 'auto',
                 width: '90%',
+
                 px: 1,
-                py: 3
+
+                py: {
+                  xs: 2,
+                  md: 3
+                }
               }}
             >
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2
+                }}
+              >
                 {/* TORNA */}
                 <Button
                   fullWidth
@@ -94,24 +138,35 @@ export default function Cart() {
                     height: 50,
                     fontWeight: 'bold',
                     textTransform: 'none',
-                    backgroundColor: 'rgba(255,255,255,0.08)',
+
+                    backgroundColor:
+                      'rgba(255,255,255,0.08)',
+
                     color: '#fff',
-                    border: '1px solid rgba(255,255,255,0.15)'
+
+                    border:
+                      '1px solid rgba(255,255,255,0.15)'
                   }}
                 >
                   ← Torna ad ordinare
                 </Button>
 
-                {/* 💰 TOTALE + 💳 PAGA */}
+                {/* TOTALE + PAGA */}
                 <Box
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
+
                     p: 1.5,
+
                     borderRadius: 2,
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)'
+
+                    backgroundColor:
+                      'rgba(255,255,255,0.05)',
+
+                    border:
+                      '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
                   {/* TOTALE */}
@@ -144,18 +199,22 @@ export default function Cart() {
                     to="/checkout"
                     sx={{
                       height: 55,
-                      px: 4,
+                      px: 3,
+
                       fontSize: '1rem',
                       fontWeight: 'bold',
                       textTransform: 'none',
-                      background: 'linear-gradient(45deg, #ff416c, #ff4b2b)',
-                      boxShadow: '0 6px 20px rgba(255,75,43,0.5)'
+
+                      background:
+                        'linear-gradient(45deg, #ff416c, #ff4b2b)',
+
+                      boxShadow:
+                        '0 6px 20px rgba(255,75,43,0.5)'
                     }}
                   >
                     💳 Paga
                   </Button>
                 </Box>
-
               </Box>
             </Box>
           </Box>

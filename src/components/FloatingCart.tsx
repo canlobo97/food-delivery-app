@@ -1,27 +1,49 @@
-import { Fab, Badge } from '@mui/material'
+import {
+  Fab,
+  Badge,
+  useMediaQuery
+} from '@mui/material'
+
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+
 import { useSelector } from 'react-redux'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { useEffect, useState, useRef } from 'react'
+
+import {
+  useNavigate,
+  useLocation
+} from 'react-router-dom'
+
+import {
+  useEffect,
+  useState,
+  useRef
+} from 'react'
 
 export default function FloatingCart() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const cartItems = useSelector((state: any) => state.cart.items)
+  const isMobile = useMediaQuery('(max-width:768px)')
+
+  const cartItems = useSelector(
+    (state: any) => state.cart.items
+  )
 
   const totalItems = cartItems.reduce(
-    (sum: number, item: any) => sum + item.quantity,
+    (sum: number, item: any) =>
+      sum + item.quantity,
     0
   )
 
-  const [animate, setAnimate] = useState(false)
+  const [animate, setAnimate] =
+    useState(false)
 
-  // 🔥 salva valore precedente
-  const prevTotalRef = useRef(totalItems)
+  // salva valore precedente
+  const prevTotalRef =
+    useRef(totalItems)
 
   useEffect(() => {
-    // 👉 trigger SOLO se aumenta
+    // trigger SOLO se aumenta
     if (totalItems > prevTotalRef.current) {
       setAnimate(true)
 
@@ -33,17 +55,27 @@ export default function FloatingCart() {
         setAnimate(false)
       }, 300)
 
-      return () => clearTimeout(timeout)
+      return () =>
+        clearTimeout(timeout)
     }
 
     prevTotalRef.current = totalItems
   }, [totalItems])
 
-  if (location.pathname === '/cart') return null
-  if (location.pathname === '/login') return null
-  if (location.pathname === '/admin') return null
-  if (location.pathname === '/register') return null
-  
+  if (location.pathname === '/cart')
+    return null
+
+  if (location.pathname === '/login')
+    return null
+
+  if (location.pathname === '/admin')
+    return null
+
+  if (
+    location.pathname === '/register'
+  )
+    return null
+
   if (totalItems === 0) return null
 
   return (
@@ -51,12 +83,29 @@ export default function FloatingCart() {
       onClick={() => navigate('/cart')}
       sx={{
         position: 'fixed',
-        top: 120,
+
+        // DESKTOP
+        top: {
+          xs: 'auto',
+          md: 75
+        },
+
+        // MOBILE
+        bottom: {
+          xs:
+            'calc(85px + env(safe-area-inset-bottom))',
+          md: 'auto'
+        },
+
         right: 20,
+
         zIndex: 1000,
 
         backdropFilter: 'blur(10px)',
-        backgroundColor: 'rgba(0,0,0,0.8)',
+
+        backgroundColor:
+          'rgba(0,0,0,0.8)',
+
         color: '#fff',
 
         boxShadow:
@@ -64,18 +113,26 @@ export default function FloatingCart() {
             ? '0 0 15px rgba(255,0,0,0.6), 0 8px 25px rgba(0,0,0,0.4)'
             : '0 8px 25px rgba(0,0,0,0.4)',
 
-        border: '1px solid rgba(255,255,255,0.1)',
+        border:
+          '1px solid rgba(255,255,255,0.1)',
 
-        transform: animate ? 'scale(1.2)' : 'scale(1)',
+        transform: animate
+          ? 'scale(1.2)'
+          : 'scale(1)',
+
         transition: 'all 0.2s ease',
 
         '&:hover': {
           transform: 'scale(1.1)',
-          backgroundColor: 'rgba(0,0,0,0.9)'
+          backgroundColor:
+            'rgba(0,0,0,0.9)'
         }
       }}
     >
-      <Badge badgeContent={totalItems} color="error">
+      <Badge
+        badgeContent={totalItems}
+        color="error"
+      >
         <ShoppingCartIcon />
       </Badge>
     </Fab>

@@ -31,16 +31,12 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            <Menu key={location.key} />
-          }
+          element={<Menu key={location.pathname} />}
         />
 
         <Route
           path="/menu"
-          element={
-            <Menu key={location.key} />
-          }
+          element={<Menu key={location.pathname} />}
         />
 
         <Route

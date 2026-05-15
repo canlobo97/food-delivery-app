@@ -1,64 +1,66 @@
 import {
   Typography,
-  Box
+  Box,
+  Tabs,
+  Tab
 } from '@mui/material'
 
-import { useEffect, useRef, useState } from 'react'
+import {
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import ProductCard from '../components/product/ProductCard'
-import CategoryTabs from '../components/menu/CategoryTabs'
 
 import { useProducts } from '../utils/useProducts'
 import type { Product } from '../types/product'
 
-// 🔥 altezza navbar
-const NAVBAR_HEIGHT = {
-  mobile: 56,
-  desktop: 64
-}
-
 export default function Menu() {
   const { products, loading } = useProducts()
 
-  const [activeCategory, setActiveCategory] = useState('')
+  const [tab, setTab] = useState(0)
 
-  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const tabsRef = useRef<HTMLDivElement | null>(null)
-  const tabItemRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const categoryRefs = useRef<
+    Record<string, HTMLDivElement | null>
+  >({})
 
-  // 🔥 GROUP BY CATEGORY
-  const grouped = products.reduce(
-    (acc: Record<string, Product[]>, product) => {
-      const category = product.category || 'Altro'
+  // GROUP PRODUCTS
+  const grouped = useMemo(() => {
+    return products.reduce(
+      (acc: Record<string, Product[]>, product) => {
+        const category = product.category || 'Altro'
 
-      if (!acc[category]) {
-        acc[category] = []
-      }
+        if (!acc[category]) {
+          acc[category] = []
+        }
 
-      acc[category].push(product)
+        acc[category].push(product)
 
-      return acc
-    },
-    {}
-  )
+        return acc
+      },
+      {}
+    )
+  }, [products])
 
   const categories = Object.keys(grouped)
 
-  // 🔥 SCROLL TO CATEGORY
-  const scrollToCategory = (cat: string) => {
-    const el = categoryRefs.current[cat]
+  const handleTabChange = (
+    _: React.SyntheticEvent,
+    value: number
+  ) => {
+    setTab(value)
+
+    const category = categories[value]
+
+    const el = categoryRefs.current[category]
 
     if (!el) return
 
-    const offset =
-      (window.innerWidth < 768
-        ? NAVBAR_HEIGHT.mobile
-        : NAVBAR_HEIGHT.desktop) + 70
-
     const y =
       el.getBoundingClientRect().top +
-      window.pageYOffset -
-      offset
+      window.scrollY -
+      12
 
     window.scrollTo({
       top: y,
@@ -66,81 +68,69 @@ export default function Menu() {
     })
   }
 
-  // 🔥 ACTIVE TAB ON SCROLL
-  useEffect(() => {
-    const handleScroll = () => {
-      let current = ''
-
-      const scrollPosition =
-        window.innerHeight + window.scrollY
-
-      const pageHeight =
-        document.body.offsetHeight
-
-      // fondo pagina
-      if (scrollPosition >= pageHeight - 50) {
-        current = categories[categories.length - 1]
-      } else {
-        categories.forEach((cat) => {
-          const el = categoryRefs.current[cat]
-
-          if (!el) return
-
-          const rect = el.getBoundingClientRect()
-
-          if (
-            rect.top <= 150 &&
-            rect.bottom >= 150
-          ) {
-            current = cat
-          }
-        })
-      }
-
-      if (
-        current &&
-        current !== activeCategory
-      ) {
-        setActiveCategory(current)
-      }
-    }
-
-    window.addEventListener(
-      'scroll',
-      handleScroll
-    )
-
-    return () => {
-      window.removeEventListener(
-        'scroll',
-        handleScroll
-      )
-    }
-  }, [categories, activeCategory])
-
   return (
     <Box
       sx={{
         width: '100%',
-        pb: 10
+        pb: {
+          xs: 14,
+          md: 4
+        }
       }}
     >
-      {/* 🔥 CATEGORY TABS */}
-      <CategoryTabs
-        categories={categories}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        scrollToCategory={scrollToCategory}
-        tabsRef={tabsRef}
-        tabItemRefs={tabItemRefs}
-      />
+      {/* CATEGORY BAR */}
+      <Box
+        sx={{
+          top: 0,
+          zIndex: 1000,
+          pb: 1,
+          background: 'rgba(0,0,0,0.92)',
 
-      {/* 🔥 CONTENT */}
+          borderBottom:
+            '1px solid rgba(255,255,255,0.06)'
+        }}
+      >
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons={false}
+          sx={{
+            minHeight: 55,
+
+            '& .MuiTabs-indicator': {
+              background:
+                'linear-gradient(45deg,#ff416c,#ff4b2b)',
+              height: 3,
+              borderRadius: 999
+            },
+
+            '& .MuiTab-root': {
+              color: '#fff',
+              textTransform: 'none',
+              fontWeight: 700,
+              minHeight: 55
+            },
+
+            '& .Mui-selected': {
+              color: '#ff4b2b !important'
+            }
+          }}
+        >
+          {categories.map((category) => (
+            <Tab
+              key={category}
+              label={category}
+            />
+          ))}
+        </Tabs>
+      </Box>
+
+      {/* CONTENT */}
       <Box
         sx={{
           maxWidth: 1200,
-          mx: 'auto',
-          px: 0
+          mx: 'auto'
         }}
       >
         {loading ? (
@@ -151,11 +141,9 @@ export default function Menu() {
           categories.map((category) => (
             <Box
               key={category}
-              ref={(el: HTMLDivElement | null) => {
-                categoryRefs.current[category] = el
-              }}
+              ref={(el: HTMLDivElement | null) => { categoryRefs.current[category] = el }}
               sx={{
-                mt: 1,
+                mt: 3,
                 px: 1
               }}
             >
@@ -163,7 +151,8 @@ export default function Menu() {
                 variant="h5"
                 sx={{
                   mb: 2,
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  color: '#fff'
                 }}
               >
                 {category.toUpperCase()}

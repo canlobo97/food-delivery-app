@@ -1,8 +1,16 @@
-html, body {
-  touch-action: manipulation;
-  overscroll-behavior: none;
+html,
+body {
   margin: 0;
-  background-color: rgba(255, 228, 196, 0.319);
+  background-color: rgb(24, 17, 0);
+}
+
+/* SOLO MOBILE / TOUCH */
+@media (pointer: coarse) {
+  html,
+  body {
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
+  }
 }
 
 input,
