@@ -28,7 +28,7 @@ export default function CartItem({ item }: any) {
         p: 1.5,
         borderRadius: 3,
         backdropFilter: 'blur(12px)',
-        backgroundColor: 'rgba(0,0,0,0.75)',
+        backgroundColor: '#1c1c1e',
         color: '#fff',
         border: '1px solid rgba(255,255,255,0.08)',
         boxShadow: '0 10px 30px rgba(0,0,0,0.4)',

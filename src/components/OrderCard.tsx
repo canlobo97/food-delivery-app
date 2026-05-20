@@ -11,6 +11,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
+import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining'
 
 import { forwardRef, useState } from 'react'
 import type { TransitionProps } from '@mui/material/transitions'
@@ -65,17 +66,19 @@ export default function OrderCard({
     }
   }
 
+  const deliveryLabel = order.asap
+    ? '⚡ Il prima possibile'
+    : order.delivery_time || 'Non specificato'
+
   return (
     <>
-      {/* 🔥 CARD COMPATTA */}
+      {/* CARD */}
       <Box
         onClick={() => setOpen(true)}
         sx={{
           borderRadius: 4,
-
           p: 2,
           mt: 2,
-
           cursor: 'pointer',
 
           backdropFilter: 'blur(14px)',
@@ -193,7 +196,54 @@ export default function OrderCard({
           </Typography>
         </Box>
 
-        {/* DATA */}
+        {/* DELIVERY TIME */}
+        <Box
+          sx={{
+            mt: 2,
+
+            p: 1.5,
+
+            borderRadius: 3,
+
+            background:
+              'rgba(255,255,255,0.05)',
+
+            border:
+              '1px solid rgba(255,255,255,0.06)',
+
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          <DeliveryDiningIcon
+            sx={{
+              color: '#ff4b2b'
+            }}
+          />
+
+          <Box>
+            <Typography
+              sx={{
+                color: '#888',
+                fontSize: '0.75rem'
+              }}
+            >
+              Consegna richiesta
+            </Typography>
+
+            <Typography
+              sx={{
+                color: '#fff',
+                fontWeight: 700
+              }}
+            >
+              {deliveryLabel}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* CREATED */}
         <Box
           sx={{
             display: 'flex',
@@ -221,7 +271,7 @@ export default function OrderCard({
         </Box>
       </Box>
 
-      {/* 🔥 MODAL APP STYLE */}
+      {/* MODAL */}
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -305,8 +355,57 @@ export default function OrderCard({
               {order.status.replaceAll('_', ' ')}
             </Box>
 
+            {/* DELIVERY TIME */}
+            <Box
+              sx={{
+                mt: 3,
+
+                p: 2,
+
+                borderRadius: 4,
+
+                background:
+                  'rgba(255,255,255,0.05)',
+
+                border:
+                  '1px solid rgba(255,255,255,0.08)',
+
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2
+              }}
+            >
+              <DeliveryDiningIcon
+                sx={{
+                  color: '#ff4b2b',
+                  fontSize: 34
+                }}
+              />
+
+              <Box>
+                <Typography
+                  sx={{
+                    color: '#888',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  Orario consegna
+                </Typography>
+
+                <Typography
+                  sx={{
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                    color: '#fff'
+                  }}
+                >
+                  {deliveryLabel}
+                </Typography>
+              </Box>
+            </Box>
+
             {/* CUSTOMER */}
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ mt: 4 }}>
               <Typography
                 sx={{
                   color: '#777',

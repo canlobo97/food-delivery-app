@@ -9,6 +9,7 @@ import {
   Button,
   Box,
 } from '@mui/material'
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import CartItem from '../components/product/CartItem'
 
@@ -49,7 +50,7 @@ export default function Cart() {
         }}
       >
         <Typography variant="h4">
-          Carrello 🛒
+          Il mio carrello
         </Typography>
 
         {cart.length > 0 && (
@@ -62,8 +63,8 @@ export default function Cart() {
               fontWeight: 'bold',
               textTransform: 'none'
             }}
-          >
-            🗑 Svuota
+          >svuota 
+            <DeleteIcon color="danger" />
           </Button>
         )}
       </Box>

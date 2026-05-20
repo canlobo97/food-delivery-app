@@ -57,7 +57,7 @@ export default function ProductCard({
         overflow: 'hidden',
 
         backdropFilter: 'blur(10px)',
-        backgroundColor: 'rgba(0,0,0,0.75)',
+        backgroundColor: '#1c1c1e',
 
         color: '#fff',
 

@@ -68,6 +68,9 @@ export default function FloatingCart() {
   if (location.pathname === '/admin')
     return null
 
+  if (location.pathname === '/checkout')
+    return null
+
   if (
     location.pathname === '/register'
   )

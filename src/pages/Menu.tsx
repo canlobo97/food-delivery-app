@@ -152,7 +152,7 @@ export default function Menu() {
                 sx={{
                   mb: 2,
                   fontWeight: 'bold',
-                  color: '#fff'
+                  color: '#000000'
                 }}
               >
                 {category.toUpperCase()}

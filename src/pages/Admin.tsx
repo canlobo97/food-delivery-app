@@ -289,7 +289,7 @@ export default function Admin() {
         }}
       >
         <Typography variant="h4">
-          Admin Panel 🔥
+          Gestione Ordini
         </Typography>
 
         <IconButton
@@ -384,7 +384,7 @@ export default function Admin() {
 
             boxSizing: 'border-box',
 
-            paddingBottom: '3rem'
+            paddingBottom: '6rem'
           }}
         >
           {/* HANDLE MOBILE */}
@@ -393,7 +393,6 @@ export default function Admin() {
               sx={{
                 width: 80,
                 height: 6,
-
                 background:
                   'rgba(255,255,255,0.4)',
 

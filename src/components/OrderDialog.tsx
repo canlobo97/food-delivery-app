@@ -136,7 +136,7 @@ export default function OrderDialog({
               flex: 1,
               overflowY: 'auto',
               p: 2,
-              pb: 6
+              pb: 8
             }}
           >
             {/* CUSTOMER */}
