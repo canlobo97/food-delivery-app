@@ -269,13 +269,15 @@ export default function Navbar() {
       <Dialog
         open={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            p: 0.5,
-            fontFamily,
-            border: `1px solid ${colors.border}`,
-            boxShadow: colors.shadow,
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              p: 0.5,
+              fontFamily,
+              border: `1px solid ${colors.border}`,
+              boxShadow: colors.shadow,
+            },
           },
         }}
       >
