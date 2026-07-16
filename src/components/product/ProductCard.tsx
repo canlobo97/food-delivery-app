@@ -17,6 +17,7 @@ import type {
 } from '../../store/store'
 
 import { formatPrice } from '../../utils/format'
+import { colors } from '../../theme/colors'
 
 type Product = {
   id: number
@@ -46,6 +47,7 @@ export default function ProductCard({
 
   return (
     <Card
+      elevation={0}
       sx={{
         display: 'flex',
         flexDirection: {
@@ -55,50 +57,40 @@ export default function ProductCard({
 
         borderRadius: 3,
         overflow: 'hidden',
+        bgcolor: colors.surface,
+        color: colors.ink,
+        border: `1px solid ${colors.border}`,
+        boxShadow: colors.shadow,
+        fontFamily: '"Outfit", system-ui, sans-serif',
 
-        backdropFilter: 'blur(10px)',
-        backgroundColor: '#1c1c1e',
-
-        color: '#fff',
-
-        border:
-          '1px solid rgba(255,255,255,0.08)',
-
-        boxShadow:
-          '0 10px 30px rgba(0,0,0,0.4)',
-
-        transition: 'all 0.2s ease',
-
-        '&:hover': {
-          transform: 'scale(1.02)'
-        },
+        transition: 'transform 0.18s ease',
 
         '&:active': {
-          transform: 'scale(0.98)'
+          transform: 'scale(0.985)'
         }
       }}
     >
-      {/* 📄 CONTENUTO */}
       <Box
         sx={{
           flex: 1,
-
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-
-          p: 2
+          p: 2,
+          order: { xs: 1, md: 2 },
         }}
       >
         <Box>
           <Typography
             sx={{
-              fontWeight: 600,
-
+              fontWeight: 700,
+              fontFamily: 'inherit',
               fontSize: {
                 xs: '1rem',
                 md: '1.1rem'
-              }
+              },
+              letterSpacing: '-0.01em',
+              lineHeight: 1.25,
             }}
           >
             {product.name}
@@ -108,8 +100,13 @@ export default function ProductCard({
             <Typography
               sx={{
                 mt: 0.5,
-                opacity: 0.6,
-                fontSize: '0.8rem'
+                color: colors.muted,
+                fontSize: '0.8rem',
+                fontFamily: 'inherit',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
               }}
             >
               {product.description}
@@ -118,58 +115,48 @@ export default function ProductCard({
 
           <Typography
             sx={{
-              mt: 1,
-              fontWeight: 'bold'
+              mt: 1.25,
+              fontWeight: 800,
+              fontFamily: 'inherit',
+              fontSize: '1.05rem',
             }}
           >
             {formatPrice(product.price)}
           </Typography>
         </Box>
 
-        {/* ➕ ADD / QUANTITY */}
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'flex-end'
+            justifyContent: 'flex-end',
+            mt: 1,
           }}
         >
           <IconButton
             onClick={handleAdd}
+            aria-label="Aggiungi al carrello"
             sx={{
-              minWidth: 42,
-              height: 42,
-
-              px: quantity > 0 ? 2 : 0,
-
+              minWidth: 44,
+              height: 44,
+              px: quantity > 0 ? 1.75 : 0,
               borderRadius: '999px',
-
-              backdropFilter: 'blur(10px)',
-
-              backgroundColor:
-                quantity > 0
-                  ? '#ff4b2b'
-                  : 'rgba(255,255,255,0.1)',
-
+              bgcolor: quantity > 0 ? colors.accent : colors.ink,
               color: '#fff',
-
-              border:
-                '1px solid rgba(255,255,255,0.15)',
-
-              transition: 'all 0.2s ease',
-
+              transition: 'transform 0.15s ease, background-color 0.15s ease',
               '&:hover': {
-                backgroundColor:
-                  quantity > 0
-                    ? '#ff2600'
-                    : 'rgba(255,255,255,0.2)'
-              }
+                bgcolor: quantity > 0 ? colors.accentDark : colors.ink,
+              },
+              '&:active': {
+                transform: 'scale(0.92)',
+              },
             }}
           >
             {quantity > 0 ? (
               <Typography
                 sx={{
-                  fontWeight: 'bold',
-                  fontSize: '0.95rem'
+                  fontWeight: 800,
+                  fontSize: '0.95rem',
+                  fontFamily: 'inherit',
                 }}
               >
                 {quantity}
@@ -181,36 +168,20 @@ export default function ProductCard({
         </Box>
       </Box>
 
-      {/* 🖼 IMMAGINE */}
       <Box
         component="img"
         src={product.image}
         alt={product.name}
         sx={{
           width: {
-            xs: 110,
+            xs: 112,
             md: '100%'
           },
-
           aspectRatio: '1 / 1',
-
           objectFit: 'cover',
-
           display: 'block',
-
-          borderTopRightRadius: {
-            xs: 12,
-            md: 12
-          },
-
-          borderBottomRightRadius: {
-            xs: 12,
-            md: 0
-          },
-
-          borderTopLeftRadius: {
-            md: 12
-          }
+          order: { xs: 2, md: 1 },
+          flexShrink: 0,
         }}
       />
     </Card>

@@ -18,6 +18,7 @@ import type { ReactElement, Ref } from 'react'
 import type { TransitionProps } from '@mui/material/transitions'
 
 import { formatPrice } from '../utils/format'
+import { colors, fontFamily } from '../theme/colors'
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
@@ -63,9 +64,9 @@ export default function OrderDialog({
       slotProps={{
         paper: {
           sx: {
-            background:
-              'linear-gradient(to bottom, #111, #1a1a1a)',
-            color: '#fff'
+            background: colors.bg,
+            color: colors.ink,
+            fontFamily,
           }
         }
       }}
@@ -84,16 +85,11 @@ export default function OrderDialog({
               position: 'sticky',
               top: 0,
               zIndex: 10,
-
               backdropFilter: 'blur(12px)',
-              backgroundColor: 'rgba(0,0,0,0.7)',
-
-              borderBottom:
-                '1px solid rgba(255,255,255,0.08)',
-
+              backgroundColor: colors.navBg,
+              borderBottom: `1px solid ${colors.border}`,
               px: 2,
               py: 2,
-
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between'
@@ -103,7 +99,9 @@ export default function OrderDialog({
               <Typography
                 sx={{
                   fontSize: '1.3rem',
-                  fontWeight: 700
+                  fontWeight: 700,
+                  fontFamily,
+                  color: colors.ink,
                 }}
               >
                 🚨 Nuovo Ordine
@@ -111,8 +109,9 @@ export default function OrderDialog({
 
               <Typography
                 sx={{
-                  opacity: 0.6,
-                  fontSize: '0.9rem'
+                  color: colors.muted,
+                  fontSize: '0.9rem',
+                  fontFamily,
                 }}
               >
                 #{order.id?.slice?.(0, 6)}
@@ -120,10 +119,10 @@ export default function OrderDialog({
             </Box>
 
             <IconButton
+              onClick={() => onReject(order)}
               sx={{
-                color: '#fff',
-                background:
-                  'rgba(255,255,255,0.08)'
+                color: colors.ink,
+                background: colors.accentSoft,
               }}
             >
               <CloseIcon />
@@ -144,12 +143,9 @@ export default function OrderDialog({
               sx={{
                 p: 2,
                 borderRadius: 4,
-
-                background:
-                  'rgba(255,255,255,0.05)',
-
-                border:
-                  '1px solid rgba(255,255,255,0.08)'
+                background: colors.surface,
+                border: `1px solid ${colors.border}`,
+                boxShadow: colors.shadow,
               }}
             >
               <Box
@@ -160,12 +156,14 @@ export default function OrderDialog({
                   mb: 2
                 }}
               >
-                <PersonIcon />
+                <PersonIcon sx={{ color: colors.accent }} />
 
                 <Typography
                   sx={{
                     fontWeight: 700,
-                    fontSize: '1.1rem'
+                    fontSize: '1.1rem',
+                    fontFamily,
+                    color: colors.ink,
                   }}
                 >
                   {order.customer?.name}
@@ -183,13 +181,14 @@ export default function OrderDialog({
                 <LocationOnIcon
                   sx={{
                     fontSize: 18,
-                    opacity: 0.7
+                    color: colors.muted,
                   }}
                 />
 
                 <Typography
                   sx={{
-                    opacity: 0.8
+                    color: colors.muted,
+                    fontFamily,
                   }}
                 >
                   {order.customer?.address}
@@ -206,13 +205,14 @@ export default function OrderDialog({
                 <PhoneIcon
                   sx={{
                     fontSize: 18,
-                    opacity: 0.7
+                    color: colors.muted,
                   }}
                 />
 
                 <Typography
                   sx={{
-                    opacity: 0.8
+                    color: colors.muted,
+                    fontFamily,
                   }}
                 >
                   {order.customer?.phone}
@@ -230,12 +230,14 @@ export default function OrderDialog({
                   mb: 2
                 }}
               >
-                <ShoppingBagIcon />
+                <ShoppingBagIcon sx={{ color: colors.accent }} />
 
                 <Typography
                   sx={{
                     fontWeight: 700,
-                    fontSize: '1.1rem'
+                    fontSize: '1.1rem',
+                    fontFamily,
+                    color: colors.ink,
                   }}
                 >
                   Prodotti
@@ -255,23 +257,20 @@ export default function OrderDialog({
                     sx={{
                       p: 2,
                       borderRadius: 3,
-
-                      background:
-                        'rgba(255,255,255,0.04)',
-
-                      border:
-                        '1px solid rgba(255,255,255,0.06)',
-
+                      background: colors.surface,
+                      border: `1px solid ${colors.border}`,
+                      boxShadow: colors.shadow,
                       display: 'flex',
-                      justifyContent:
-                        'space-between',
+                      justifyContent: 'space-between',
                       alignItems: 'center'
                     }}
                   >
                     <Box>
                       <Typography
                         sx={{
-                          fontWeight: 600
+                          fontWeight: 600,
+                          color: colors.ink,
+                          fontFamily,
                         }}
                       >
                         {item.name}
@@ -279,8 +278,9 @@ export default function OrderDialog({
 
                       <Typography
                         sx={{
-                          opacity: 0.6,
-                          fontSize: '0.85rem'
+                          color: colors.muted,
+                          fontSize: '0.85rem',
+                          fontFamily,
                         }}
                       >
                         Quantità: {item.quantity}
@@ -289,7 +289,9 @@ export default function OrderDialog({
 
                     <Typography
                       sx={{
-                        fontWeight: 700
+                        fontWeight: 700,
+                        color: colors.ink,
+                        fontFamily,
                       }}
                     >
                       {formatPrice(
@@ -307,18 +309,16 @@ export default function OrderDialog({
                 mt: 4,
                 p: 2.5,
                 borderRadius: 4,
-
-                background:
-                  'linear-gradient(45deg,#ff416c,#ff4b2b)',
-
-                boxShadow:
-                  '0 10px 30px rgba(255,75,43,0.35)'
+                background: `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`,
+                boxShadow: colors.shadowFab,
+                color: '#fff',
               }}
             >
               <Typography
                 sx={{
-                  opacity: 0.8,
-                  fontSize: '0.9rem'
+                  opacity: 0.9,
+                  fontSize: '0.9rem',
+                  fontFamily,
                 }}
               >
                 Totale Ordine
@@ -327,7 +327,8 @@ export default function OrderDialog({
               <Typography
                 sx={{
                   fontSize: '2rem',
-                  fontWeight: 800
+                  fontWeight: 800,
+                  fontFamily,
                 }}
               >
                 {formatPrice(order.total)}
@@ -338,10 +339,8 @@ export default function OrderDialog({
             <Box
               sx={{
                 mt: 3,
-
                 display: 'flex',
                 gap: 2,
-
                 pb: {
                   xs: 'calc(24px + env(safe-area-inset-bottom))',
                   md: 2
@@ -354,17 +353,14 @@ export default function OrderDialog({
                 sx={{
                   height: 56,
                   borderRadius: 4,
-
-                  background:
-                    'rgba(255,255,255,0.08)',
-
-                  color: '#fff',
-
+                  background: colors.surface,
+                  border: `1px solid ${colors.borderStrong}`,
+                  color: colors.ink,
                   fontWeight: 700,
-
+                  fontFamily,
+                  textTransform: 'none',
                   '&:hover': {
-                    background:
-                      'rgba(255,255,255,0.12)'
+                    background: colors.bg,
                   }
                 }}
               >
@@ -378,14 +374,11 @@ export default function OrderDialog({
                 sx={{
                   height: 56,
                   borderRadius: 4,
-
                   fontWeight: 700,
-
-                  background:
-                    'linear-gradient(45deg,#ff416c,#ff4b2b)',
-
-                  boxShadow:
-                    '0 8px 24px rgba(255,75,43,0.35)'
+                  fontFamily,
+                  textTransform: 'none',
+                  background: `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`,
+                  boxShadow: colors.shadowFab,
                 }}
               >
                 ✅ Accetta

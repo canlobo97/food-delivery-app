@@ -29,6 +29,7 @@ import { inputStyles, selectStyle } from '../styles/formStyles'
 
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useTheme } from '@mui/material/styles'
+import { colors, fontFamily } from '../theme/colors'
 
 export default function Admin() {
   const [orders, setOrders] = useState<any[]>([])
@@ -279,7 +280,7 @@ export default function Admin() {
   )
 
   return (
-    <Container sx={{ mt: 4, pb: 10 }}>
+    <Container sx={{ mt: 4, pb: 10, fontFamily, bgcolor: colors.bg }}>
       {/* HEADER */}
       <Box
         sx={{
@@ -288,7 +289,10 @@ export default function Admin() {
           alignItems: 'center'
         }}
       >
-        <Typography variant="h4">
+        <Typography
+          variant="h4"
+          sx={{ color: colors.ink, fontWeight: 800, fontFamily }}
+        >
           Gestione Ordini
         </Typography>
 
@@ -297,10 +301,12 @@ export default function Admin() {
             setOpenFilters(true)
           }
           sx={{
-            background:
-              'linear-gradient(45deg,#ff416c,#ff4b2b)',
-
-            color: '#fff'
+            background: `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`,
+            color: '#fff',
+            boxShadow: colors.shadowFab,
+            '&:hover': {
+              background: `linear-gradient(135deg, ${colors.accentDark}, ${colors.accent})`,
+            },
           }}
         >
           <FilterListIcon />
@@ -312,7 +318,9 @@ export default function Admin() {
         <Typography
           sx={{
             mt: 2,
-            color: '#ff4b2b'
+            color: colors.accent,
+            fontFamily,
+            fontWeight: 600,
           }}
         >
           🔔 {incomingOrders.length} nuovi
@@ -351,7 +359,8 @@ export default function Admin() {
               borderTopRightRadius:
                 isMobile ? 20 : 0,
 
-              overflowX: 'hidden'
+              overflowX: 'hidden',
+              backgroundColor: colors.surface,
             }
           }
         }}
@@ -370,13 +379,13 @@ export default function Admin() {
 
             gap: 2,
 
-            background: '#1c1c1e',
+            background: colors.surface,
 
             height: isMobile
               ? 'auto'
               : '100%',
 
-            color: '#fff',
+            color: colors.ink,
 
             overflowX: 'hidden',
 
@@ -384,7 +393,8 @@ export default function Admin() {
 
             boxSizing: 'border-box',
 
-            paddingBottom: '6rem'
+            paddingBottom: '6rem',
+            fontFamily,
           }}
         >
           {/* HANDLE MOBILE */}
@@ -393,8 +403,7 @@ export default function Admin() {
               sx={{
                 width: 80,
                 height: 6,
-                background:
-                  'rgba(255,255,255,0.4)',
+                background: colors.borderStrong,
 
                 borderRadius: 10,
 
@@ -405,7 +414,7 @@ export default function Admin() {
             />
           )}
 
-          <Typography variant="h6">
+          <Typography variant="h6" sx={{ color: colors.ink, fontFamily, fontWeight: 700 }}>
             Filtri 🔍
           </Typography>
 
@@ -466,10 +475,9 @@ export default function Admin() {
                   slotProps: {
                     paper: {
                       sx: {
-                        backgroundColor:
-                          '#1c1c1e',
-
-                        color: '#fff'
+                        backgroundColor: colors.surface,
+                        color: colors.ink,
+                        border: `1px solid ${colors.border}`,
                       }
                     }
                   }
@@ -553,6 +561,13 @@ export default function Admin() {
                   date: ''
                 })
               }
+              sx={{
+                borderColor: colors.borderStrong,
+                color: colors.ink,
+                fontFamily,
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
             >
               Reset
             </Button>
@@ -564,8 +579,11 @@ export default function Admin() {
                 setOpenFilters(false)
               }
               sx={{
-                background:
-                  'linear-gradient(45deg,#ff416c,#ff4b2b)'
+                background: `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`,
+                boxShadow: colors.shadowFab,
+                fontFamily,
+                textTransform: 'none',
+                fontWeight: 700,
               }}
             >
               Risultati{' '}

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Typography, IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import IosShareIcon from '@mui/icons-material/IosShare';
+import IosShareIcon from '@mui/icons-material/IosShare'
+import { colors, fontFamily } from '../../theme/colors'
 
 export default function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
@@ -62,46 +63,53 @@ export default function InstallPWA() {
     <Box
       sx={{
         position: 'fixed',
-        bottom: 20,
+        bottom: {
+          xs: 'calc(76px + env(safe-area-inset-bottom))',
+          md: 20,
+        },
         left: 20,
         right: 20,
-        bgcolor: '#1c1c1e',
-        color: '#fff',
+        bgcolor: colors.surface,
+        color: colors.ink,
         p: 2,
         borderRadius: '20px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
+        boxShadow: colors.shadow,
+        border: `1px solid ${colors.border}`,
         zIndex: 9999,
-        animation: 'slideUp 0.4s ease'
+        animation: 'slideUp 0.4s ease',
+        fontFamily,
       }}
     >
       {/* 🎨 testo */}
       <Box>
         {isIOS ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 600, fontFamily }}>
               📲 Installa l’app
             </Typography>
 
-            <Typography sx={{ fontSize: 13, opacity: 0.8 }}>
+            <Typography sx={{ fontSize: 13, color: colors.muted, fontFamily }}>
               1. Tocca
               <Box component="span" sx={{ mx: 0.5, verticalAlign: 'middle' }}>
-                <IosShareIcon fontSize="small" />
+                <IosShareIcon fontSize="small" sx={{ color: colors.accent }} />
               </Box>
               in basso
             </Typography>
 
-            <Typography sx={{ fontSize: 13, opacity: 0.8 }}>
-              2. Premi <b>"Aggiungi alla schermata Home"</b>
+            <Typography sx={{ fontSize: 13, color: colors.muted, fontFamily }}>
+              2. Premi <b>&quot;Aggiungi alla schermata Home&quot;</b>
             </Typography>
           </Box>
         ) : (
-          <Typography sx={{ fontSize: 14 }}>
+          <Typography sx={{ fontSize: 14, fontFamily, color: colors.ink }}>
             🚀 Installa EnjoyEat
             <br />
-            Accesso veloce e notifiche 🔔
+            <Box component="span" sx={{ color: colors.muted, fontSize: 13 }}>
+              Accesso veloce e notifiche 🔔
+            </Box>
           </Typography>
         )}
       </Box>
@@ -115,14 +123,17 @@ export default function InstallPWA() {
             sx={{
               borderRadius: '12px',
               textTransform: 'none',
-              fontWeight: 'bold'
+              fontWeight: 700,
+              fontFamily,
+              background: `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`,
+              boxShadow: colors.shadowFab,
             }}
           >
             Installa
           </Button>
         )}
 
-        <IconButton onClick={closeBanner} sx={{ color: '#fff' }}>
+        <IconButton onClick={closeBanner} sx={{ color: colors.muted }}>
           <CloseIcon />
         </IconButton>
       </Box>

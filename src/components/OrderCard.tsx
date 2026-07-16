@@ -17,6 +17,7 @@ import { forwardRef, useState } from 'react'
 import type { TransitionProps } from '@mui/material/transitions'
 
 import { formatPrice } from '../utils/format'
+import { colors, fontFamily } from '../theme/colors'
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
@@ -62,7 +63,7 @@ export default function OrderCard({
         return '#ff0303'
 
       default:
-        return '#fff'
+        return colors.muted
     }
   }
 
@@ -80,20 +81,12 @@ export default function OrderCard({
           p: 2,
           mt: 2,
           cursor: 'pointer',
-
-          backdropFilter: 'blur(14px)',
-
-          background:
-            'linear-gradient(180deg, rgba(25,25,25,0.95), rgba(10,10,10,0.95))',
-
-          border:
-            '1px solid rgba(255,255,255,0.08)',
-
-          boxShadow:
-            '0 12px 30px rgba(0,0,0,0.45)',
-
+          backgroundColor: colors.surface,
+          border: `1px solid ${colors.border}`,
+          boxShadow: colors.shadow,
+          color: colors.ink,
+          fontFamily,
           transition: 'all 0.25s ease',
-
           '&:active': {
             transform: 'scale(0.98)'
           }
@@ -110,9 +103,10 @@ export default function OrderCard({
           <Box>
             <Typography
               sx={{
-                color: '#fff',
+                color: colors.ink,
                 fontWeight: 700,
-                fontSize: '1.05rem'
+                fontSize: '1.05rem',
+                fontFamily,
               }}
             >
               👤 {order.customer?.name}
@@ -120,9 +114,10 @@ export default function OrderCard({
 
             <Typography
               sx={{
-                color: '#aaa',
+                color: colors.muted,
                 fontSize: '0.85rem',
-                mt: 0.3
+                mt: 0.3,
+                fontFamily,
               }}
             >
               📞 {order.customer?.phone}
@@ -133,18 +128,13 @@ export default function OrderCard({
             sx={{
               px: 1.5,
               py: 0.7,
-
               borderRadius: '999px',
-
               background: getStatusColor(),
-
               color: '#fff',
-
               fontWeight: 700,
-
               fontSize: '0.75rem',
-
-              textTransform: 'uppercase'
+              textTransform: 'uppercase',
+              fontFamily,
             }}
           >
             {order.status.replaceAll('_', ' ')}
@@ -157,7 +147,6 @@ export default function OrderCard({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-
             mt: 2
           }}
         >
@@ -170,15 +159,16 @@ export default function OrderCard({
           >
             <ReceiptLongIcon
               sx={{
-                color: '#ff4b2b',
+                color: colors.accent,
                 fontSize: 20
               }}
             />
 
             <Typography
               sx={{
-                color: '#fff',
-                fontWeight: 600
+                color: colors.ink,
+                fontWeight: 600,
+                fontFamily,
               }}
             >
               {order.items?.length} prodotti
@@ -187,9 +177,10 @@ export default function OrderCard({
 
           <Typography
             sx={{
-              color: '#fff',
-              fontWeight: 'bold',
-              fontSize: '1rem'
+              color: colors.ink,
+              fontWeight: 800,
+              fontSize: '1rem',
+              fontFamily,
             }}
           >
             {formatPrice(order.total)}
@@ -200,17 +191,10 @@ export default function OrderCard({
         <Box
           sx={{
             mt: 2,
-
             p: 1.5,
-
             borderRadius: 3,
-
-            background:
-              'rgba(255,255,255,0.05)',
-
-            border:
-              '1px solid rgba(255,255,255,0.06)',
-
+            background: colors.bg,
+            border: `1px solid ${colors.border}`,
             display: 'flex',
             alignItems: 'center',
             gap: 1
@@ -218,15 +202,16 @@ export default function OrderCard({
         >
           <DeliveryDiningIcon
             sx={{
-              color: '#ff4b2b'
+              color: colors.accent
             }}
           />
 
           <Box>
             <Typography
               sx={{
-                color: '#888',
-                fontSize: '0.75rem'
+                color: colors.muted,
+                fontSize: '0.75rem',
+                fontFamily,
               }}
             >
               Consegna richiesta
@@ -234,8 +219,9 @@ export default function OrderCard({
 
             <Typography
               sx={{
-                color: '#fff',
-                fontWeight: 700
+                color: colors.ink,
+                fontWeight: 700,
+                fontFamily,
               }}
             >
               {deliveryLabel}
@@ -249,21 +235,21 @@ export default function OrderCard({
             display: 'flex',
             alignItems: 'center',
             gap: 1,
-
             mt: 1.5
           }}
         >
           <AccessTimeIcon
             sx={{
-              color: '#777',
+              color: colors.muted,
               fontSize: 18
             }}
           />
 
           <Typography
             sx={{
-              color: '#999',
-              fontSize: '0.8rem'
+              color: colors.muted,
+              fontSize: '0.8rem',
+              fontFamily,
             }}
           >
             {new Date(order.created_at).toLocaleString()}
@@ -282,14 +268,11 @@ export default function OrderCard({
       >
         <DialogContent
           sx={{
-            background:
-              'linear-gradient(180deg,#111,#000)',
-
-            color: '#fff',
-
+            background: colors.bg,
+            color: colors.ink,
             p: 0,
-
-            minHeight: '100vh'
+            minHeight: '100vh',
+            fontFamily,
           }}
         >
           {/* HEADER */}
@@ -297,21 +280,13 @@ export default function OrderCard({
             sx={{
               position: 'sticky',
               top: 0,
-
               zIndex: 10,
-
               backdropFilter: 'blur(12px)',
-
-              background:
-                'rgba(0,0,0,0.75)',
-
-              borderBottom:
-                '1px solid rgba(255,255,255,0.08)',
-
+              background: colors.navBg,
+              borderBottom: `1px solid ${colors.border}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-
               px: 2,
               py: 2
             }}
@@ -319,7 +294,9 @@ export default function OrderCard({
             <Typography
               sx={{
                 fontWeight: 700,
-                fontSize: '1.2rem'
+                fontSize: '1.2rem',
+                fontFamily,
+                color: colors.ink,
               }}
             >
               Ordine #{order.id}
@@ -327,7 +304,7 @@ export default function OrderCard({
 
             <IconButton
               onClick={() => setOpen(false)}
-              sx={{ color: '#fff' }}
+              sx={{ color: colors.ink }}
             >
               <CloseIcon />
             </IconButton>
@@ -339,17 +316,14 @@ export default function OrderCard({
             <Box
               sx={{
                 display: 'inline-flex',
-
                 px: 2,
                 py: 1,
-
                 borderRadius: '999px',
-
                 background: getStatusColor(),
-
+                color: '#fff',
                 fontWeight: 'bold',
-
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                fontFamily,
               }}
             >
               {order.status.replaceAll('_', ' ')}
@@ -359,17 +333,11 @@ export default function OrderCard({
             <Box
               sx={{
                 mt: 3,
-
                 p: 2,
-
                 borderRadius: 4,
-
-                background:
-                  'rgba(255,255,255,0.05)',
-
-                border:
-                  '1px solid rgba(255,255,255,0.08)',
-
+                background: colors.surface,
+                border: `1px solid ${colors.border}`,
+                boxShadow: colors.shadow,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2
@@ -377,7 +345,7 @@ export default function OrderCard({
             >
               <DeliveryDiningIcon
                 sx={{
-                  color: '#ff4b2b',
+                  color: colors.accent,
                   fontSize: 34
                 }}
               />
@@ -385,8 +353,9 @@ export default function OrderCard({
               <Box>
                 <Typography
                   sx={{
-                    color: '#888',
-                    fontSize: '0.85rem'
+                    color: colors.muted,
+                    fontSize: '0.85rem',
+                    fontFamily,
                   }}
                 >
                   Orario consegna
@@ -396,7 +365,8 @@ export default function OrderCard({
                   sx={{
                     fontSize: '1.2rem',
                     fontWeight: 700,
-                    color: '#fff'
+                    color: colors.ink,
+                    fontFamily,
                   }}
                 >
                   {deliveryLabel}
@@ -408,22 +378,23 @@ export default function OrderCard({
             <Box sx={{ mt: 4 }}>
               <Typography
                 sx={{
-                  color: '#777',
-                  mb: 1
+                  color: colors.muted,
+                  mb: 1,
+                  fontFamily,
                 }}
               >
                 Cliente
               </Typography>
 
-              <Typography sx={{ fontSize: '1.1rem' }}>
+              <Typography sx={{ fontSize: '1.1rem', color: colors.ink, fontFamily }}>
                 👤 {order.customer?.name}
               </Typography>
 
-              <Typography sx={{ mt: 1, color: '#ccc' }}>
+              <Typography sx={{ mt: 1, color: colors.muted, fontFamily }}>
                 📞 {order.customer?.phone}
               </Typography>
 
-              <Typography sx={{ mt: 1, color: '#ccc' }}>
+              <Typography sx={{ mt: 1, color: colors.muted, fontFamily }}>
                 📍 {order.customer?.address}
               </Typography>
             </Box>
@@ -432,8 +403,9 @@ export default function OrderCard({
             <Box sx={{ mt: 4 }}>
               <Typography
                 sx={{
-                  color: '#777',
-                  mb: 2
+                  color: colors.muted,
+                  mb: 2,
+                  fontFamily,
                 }}
               >
                 Prodotti
@@ -446,23 +418,20 @@ export default function OrderCard({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-
                     p: 2,
                     mb: 1.5,
-
                     borderRadius: 3,
-
-                    background:
-                      'rgba(255,255,255,0.05)',
-
-                    border:
-                      '1px solid rgba(255,255,255,0.06)'
+                    background: colors.surface,
+                    border: `1px solid ${colors.border}`,
+                    boxShadow: colors.shadow,
                   }}
                 >
                   <Box>
                     <Typography
                       sx={{
-                        fontWeight: 600
+                        fontWeight: 600,
+                        color: colors.ink,
+                        fontFamily,
                       }}
                     >
                       {item.name}
@@ -470,8 +439,9 @@ export default function OrderCard({
 
                     <Typography
                       sx={{
-                        color: '#888',
-                        fontSize: '0.85rem'
+                        color: colors.muted,
+                        fontSize: '0.85rem',
+                        fontFamily,
                       }}
                     >
                       Quantità: {item.quantity}
@@ -480,7 +450,9 @@ export default function OrderCard({
 
                   <Typography
                     sx={{
-                      fontWeight: 'bold'
+                      fontWeight: 'bold',
+                      color: colors.ink,
+                      fontFamily,
                     }}
                   >
                     {formatPrice(
@@ -495,23 +467,21 @@ export default function OrderCard({
             <Box
               sx={{
                 mt: 4,
-
                 p: 2.5,
-
                 borderRadius: 4,
-
-                background:
-                  'linear-gradient(45deg,#ff416c,#ff4b2b)',
-
+                background: `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`,
+                color: '#fff',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                boxShadow: colors.shadowFab,
               }}
             >
               <Typography
                 sx={{
                   fontWeight: 700,
-                  fontSize: '1.1rem'
+                  fontSize: '1.1rem',
+                  fontFamily,
                 }}
               >
                 Totale
@@ -520,7 +490,8 @@ export default function OrderCard({
               <Typography
                 sx={{
                   fontWeight: 'bold',
-                  fontSize: '1.3rem'
+                  fontSize: '1.3rem',
+                  fontFamily,
                 }}
               >
                 {formatPrice(order.total)}
@@ -531,10 +502,8 @@ export default function OrderCard({
             <Box
               sx={{
                 mt: 4,
-
                 display: 'flex',
                 gap: 1.5,
-
                 pb: 4
               }}
             >
@@ -551,13 +520,12 @@ export default function OrderCard({
                   }
                   sx={{
                     py: 1.5,
-
                     borderRadius: 3,
-
                     fontWeight: 'bold',
-
-                    background:
-                      'linear-gradient(45deg,#ff9800,#ff5722)'
+                    fontFamily,
+                    textTransform: 'none',
+                    background: `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`,
+                    boxShadow: colors.shadowFab,
                   }}
                 >
                   🚚 In consegna
@@ -577,13 +545,11 @@ export default function OrderCard({
                   }
                   sx={{
                     py: 1.5,
-
                     borderRadius: 3,
-
                     fontWeight: 'bold',
-
-                    background:
-                      'linear-gradient(45deg,#4caf50,#2e7d32)'
+                    fontFamily,
+                    textTransform: 'none',
+                    background: 'linear-gradient(45deg,#4caf50,#2e7d32)'
                   }}
                 >
                   ✅ Consegnato

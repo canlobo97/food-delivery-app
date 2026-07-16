@@ -1,131 +1,141 @@
+import { colors } from '../theme/colors'
+
 export const inputStyles = {
   '& .MuiOutlinedInput-root': {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
+    borderRadius: '14px',
 
     '& fieldset': {
-      borderColor: 'rgba(0,0,0,0.2)'
+      borderColor: colors.borderStrong,
     },
 
     '&:hover fieldset': {
-      borderColor: '#ff4b2b'
+      borderColor: colors.accent,
     },
 
     '&.Mui-focused fieldset': {
-      borderColor: '#ff4b2b',
-      borderWidth: '2px'
-    }
+      borderColor: colors.accent,
+      borderWidth: '2px',
+    },
   },
 
   '& .MuiOutlinedInput-input': {
-    color: '#000'
+    color: colors.ink,
   },
 
   '& .MuiInputLabel-root': {
-    color: '#000'
+    color: colors.muted,
   },
 
   '& .MuiInputLabel-root.Mui-focused': {
-    color: '#ff4b2b'
-  }
+    color: colors.accent,
+  },
 }
 
 export const radioStyles = {
-  color: '#fff',
+  color: colors.muted,
 
   '&.Mui-checked': {
-    color: '#ff4b2b'
-  }
+    color: colors.accent,
+  },
 }
 
 export const formLabelStyles = {
-  color: '#fff',
+  color: colors.ink,
+  fontWeight: 700,
 
   '&.Mui-focused': {
-    color: '#ff4b2b'
-  }
+    color: colors.accent,
+  },
 }
-
 
 export const cardStyle = {
   p: 2,
   borderRadius: 3,
-  backgroundColor: 'rgba(8, 0, 0, 0.05)',
-  border: '1px solid rgba(9, 0, 0, 0.1)',
-  color: '#090000'
+  backgroundColor: colors.surface,
+  border: `1px solid ${colors.border}`,
+  boxShadow: colors.shadow,
+  color: colors.ink,
 }
 
 export const orderCard = {
   mt: 3,
   p: 3,
   borderRadius: 3,
-  backgroundColor: 'rgba(0,0,0,0.7)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  color: '#fff'
+  backgroundColor: colors.surface,
+  border: `1px solid ${colors.border}`,
+  boxShadow: colors.shadow,
+  color: colors.ink,
 }
 
 export const itemRow = {
   display: 'flex',
   justifyContent: 'space-between',
-  borderBottom: '1px solid rgba(255,255,255,0.1)',
-  py: 1
+  borderBottom: `1px solid ${colors.border}`,
+  py: 1,
 }
 
 export const selectStyle = {
   '& .MuiOutlinedInput-root': {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
+    borderRadius: '14px',
 
     '& fieldset': {
-      borderColor: 'rgba(0,0,0,0.2)'
+      borderColor: colors.borderStrong,
     },
 
     '&:hover fieldset': {
-      borderColor: '#ff4b2b'
+      borderColor: colors.accent,
     },
 
     '&.Mui-focused fieldset': {
-      borderColor: '#ff4b2b',
-      borderWidth: '2px'
-    }
+      borderColor: colors.accent,
+      borderWidth: '2px',
+    },
   },
 
-  // 🔥 rimuove COMPLETAMENTE il blu del browser
   '& .MuiOutlinedInput-root.Mui-focused': {
-    outline: 'none'
+    outline: 'none',
   },
 
-  
-
-  // 🔥 fix extra per alcuni browser
   '& .MuiOutlinedInput-root:focus-within': {
-    outline: 'none'
+    outline: 'none',
   },
 
-  // 🔥 testo
   '& .MuiSelect-select': {
-    color: '#000',
-    backgroundColor: '#fff'
+    color: colors.ink,
+    backgroundColor: colors.surface,
   },
 
-  // 🔥 icona
   '& .MuiSelect-icon': {
-    color: '#000'
+    color: colors.ink,
   },
 
-  // 🔥 label
   '& .MuiInputLabel-root': {
-    color: '#000'
+    color: colors.muted,
   },
 
   '& .MuiInputLabel-root.Mui-focused': {
-    color: '#ff4b2b'
-  }
+    color: colors.accent,
+  },
 }
 
 export const ctaStyle = {
-  background: 'linear-gradient(45deg, #ff416c, #ff4b2b)',
-  color: '#070000',
+  background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentDark} 100%)`,
+  color: '#fff',
   fontWeight: 'bold',
   textTransform: 'none',
   borderRadius: 2,
-  boxShadow: '0 6px 20px rgba(255,75,43,0.5)'
+  boxShadow: colors.shadowFab,
 }
+
+export const panelStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
+  backgroundColor: colors.surface,
+  borderRadius: 3,
+  p: 3,
+  border: `1px solid ${colors.border}`,
+  boxShadow: colors.shadow,
+} as const

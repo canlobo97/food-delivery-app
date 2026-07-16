@@ -40,8 +40,12 @@ import { formatPrice } from '../utils/format'
 
 import {
   inputStyles,
-  radioStyles
+  radioStyles,
+  formLabelStyles,
+  panelStyle,
 } from '../styles/formStyles'
+
+import { colors, fontFamily } from '../theme/colors'
 
 export default function Checkout() {
   const dispatch = useDispatch<AppDispatch>()
@@ -73,6 +77,8 @@ export default function Checkout() {
 
   const [disabledSlots, setDisabledSlots] =
     useState<string[]>([])
+
+  const [submitting, setSubmitting] = useState(false)
 
   // 🔥 GENERATE TIME SLOTS
 
@@ -164,36 +170,36 @@ export default function Checkout() {
   }
 
   const isValid =
+    cart.length > 0 &&
     form.name &&
     form.address &&
     form.phone &&
     form.payment &&
-    (deliveryMode === 'asap' ||
-      selectedSlot)
+    (deliveryMode === 'asap' || selectedSlot)
+
+  const mapOrderError = (message: string) => {
+    if (message.includes('EMPTY_CART')) return 'Il carrello è vuoto'
+    if (message.includes('NOT_AUTHENTICATED')) return 'Devi essere loggato'
+    if (message.includes('INVALID_CUSTOMER')) return 'Completa tutti i dati'
+    if (message.includes('SLOT_REQUIRED')) return 'Seleziona un orario'
+    if (message.includes('PRODUCT_NOT_FOUND')) return 'Un prodotto non è più disponibile'
+    if (message.includes('INVALID_QUANTITY')) return 'Quantità non valida'
+    return 'Errore nel salvataggio ordine'
+  }
 
   const handleSubmit = async () => {
-    if (!isValid) return
+    if (!isValid || submitting) return
 
     if (!user) {
       alert('Devi essere loggato')
       return
     }
 
-    // 🔥 DOUBLE SECURITY CHECK
-
-    if (
-      deliveryMode === 'scheduled'
-    ) {
-      const blocked =
-        await isSlotDisabled(
-          selectedSlot
-        )
+    if (deliveryMode === 'scheduled') {
+      const blocked = await isSlotDisabled(selectedSlot)
 
       if (blocked) {
-        alert(
-          'Questo orario è appena stato occupato 😥'
-        )
-
+        alert('Questo orario è appena stato occupato 😥')
         return
       }
     }
@@ -201,51 +207,44 @@ export default function Checkout() {
     const deliveryTimestamp =
       deliveryMode === 'scheduled'
         ? new Date(
-            `${new Date()
-              .toISOString()
-              .split('T')[0]}T${selectedSlot}:00`
+            `${new Date().toISOString().split('T')[0]}T${selectedSlot}:00`
           ).toISOString()
         : null
 
-    const order = {
-      user_id: user.id,
+    // Solo id/qty/notes — prezzi e total li calcola create_order sul DB
+    const payloadItems = cart.map((item) => ({
+      id: item.id,
+      quantity: item.quantity,
+      notes: item.notes || '',
+    }))
 
-      total,
+    setSubmitting(true)
 
-      items: cart,
+    const { data, error } = await supabase.rpc('create_order', {
+      p_items: payloadItems,
+      p_customer: form,
+      p_asap: deliveryMode === 'asap',
+      p_delivery_time:
+        deliveryMode === 'asap' ? null : selectedSlot,
+      p_delivery_timestamp: deliveryTimestamp,
+    })
 
-      customer: form,
-
-      asap:
-        deliveryMode === 'asap',
-
-      delivery_time:
-        deliveryMode === 'asap'
-          ? 'Il prima possibile'
-          : selectedSlot,
-
-      delivery_timestamp:
-        deliveryTimestamp
-    }
-
-    const { error } =
-      await supabase
-        .from('orders')
-        .insert([order])
+    setSubmitting(false)
 
     if (error) {
       console.error(error)
-
-      alert(
-        'Errore nel salvataggio ordine'
-      )
-
+      alert(mapOrderError(error.message || ''))
       return
     }
 
     dispatch(clearCart())
 
-    alert('Ordine inviato! 🎉')
+    const serverTotal =
+      data && typeof data === 'object' && 'total' in data
+        ? Number((data as { total: number }).total)
+        : total
+
+    alert(`Ordine inviato! Totale ${formatPrice(serverTotal)}`)
 
     navigate('/')
   }
@@ -255,44 +254,23 @@ export default function Checkout() {
       maxWidth="sm"
       sx={{
         mt: 4,
-        pb: 14
+        pb: 14,
+        fontFamily,
       }}
     >
       <Typography
         variant="h4"
         gutterBottom
         sx={{
-          color: '#070000'
+          color: colors.ink,
+          fontWeight: 800,
+          fontFamily,
         }}
       >
-        Pagamento 
+        Pagamento
       </Typography>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-
-          backdropFilter:
-            'blur(12px)',
-
-          backgroundColor:
-            '#1c1c1e',
-
-          borderRadius: 3,
-
-          p: 3,
-
-          border:
-            '1px solid rgba(255,255,255,0.1)',
-
-          boxShadow:
-            '0 10px 30px rgba(0,0,0,0.4)'
-        }}
-      >
-        {/* INPUTS */}
-
+      <Box sx={panelStyle}>
         <TextField
           label="Nome"
           name="name"
@@ -320,15 +298,8 @@ export default function Checkout() {
           sx={inputStyles}
         />
 
-        {/* DELIVERY */}
-
         <FormControl>
-          <FormLabel
-            sx={{
-              color: '#fff',
-              mb: 1
-            }}
-          >
+          <FormLabel sx={{ ...formLabelStyles, mb: 1 }}>
             Consegna
           </FormLabel>
 
@@ -336,54 +307,34 @@ export default function Checkout() {
             value={deliveryMode}
             onChange={(e) =>
               setDeliveryMode(
-                e.target.value as
-                  | 'asap'
-                  | 'scheduled'
+                e.target.value as 'asap' | 'scheduled'
               )
             }
           >
             <FormControlLabel
               value="asap"
-              control={
-                <Radio
-                  sx={
-                    radioStyles
-                  }
-                />
-              }
+              control={<Radio sx={radioStyles} />}
               label="⚡ Il prima possibile"
-              sx={{
-                color: '#fff'
-              }}
+              sx={{ color: colors.ink, fontFamily }}
             />
 
             <FormControlLabel
               value="scheduled"
-              control={
-                <Radio
-                  sx={
-                    radioStyles
-                  }
-                />
-              }
+              control={<Radio sx={radioStyles} />}
               label="🕒 Scegli orario"
-              sx={{
-                color: '#fff'
-              }}
+              sx={{ color: colors.ink, fontFamily }}
             />
           </RadioGroup>
         </FormControl>
 
-        {/* TIME SLOTS */}
-
-        {deliveryMode ===
-          'scheduled' && (
+        {deliveryMode === 'scheduled' && (
           <Box>
             <Typography
               sx={{
-                color: '#fff',
+                color: colors.ink,
                 mb: 1,
-                fontWeight: 700
+                fontWeight: 700,
+                fontFamily,
               }}
             >
               Orari disponibili
@@ -393,53 +344,33 @@ export default function Checkout() {
               sx={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: 1
+                gap: 1,
               }}
             >
               {slots.map((slot) => {
-                const disabled =
-                  disabledSlots.includes(
-                    slot
-                  )
+                const disabled = disabledSlots.includes(slot)
+                const selected = selectedSlot === slot
 
                 return (
                   <Chip
                     key={slot}
-                    label={
-                      disabled
-                        ? `${slot} ❌`
-                        : slot
-                    }
-                    clickable={
-                      !disabled
-                    }
-                    disabled={
-                      disabled
-                    }
-                    onClick={() =>
-                      setSelectedSlot(
-                        slot
-                      )
-                    }
+                    label={disabled ? `${slot} ❌` : slot}
+                    clickable={!disabled}
+                    disabled={disabled}
+                    onClick={() => setSelectedSlot(slot)}
                     sx={{
                       height: 42,
-
                       fontWeight: 700,
-
-                      color:
-                        selectedSlot ===
-                        slot
-                          ? '#fff'
-                          : '#ddd',
-
-                      background:
-                        selectedSlot ===
-                        slot
-                          ? 'linear-gradient(45deg,#ff416c,#ff4b2b)'
-                          : 'rgba(255,255,255,0.08)',
-
-                      border:
-                        '1px solid rgba(255,255,255,0.1)'
+                      fontFamily,
+                      color: selected ? '#fff' : colors.ink,
+                      background: selected
+                        ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`
+                        : colors.bg,
+                      border: `1px solid ${selected ? colors.accent : colors.border}`,
+                      '&.Mui-disabled': {
+                        opacity: 0.45,
+                        color: colors.muted,
+                      },
                     }}
                   />
                 )
@@ -448,95 +379,54 @@ export default function Checkout() {
           </Box>
         )}
 
-        {/* PAYMENT */}
-
         <FormControl>
-          <FormLabel
-            sx={{
-              color: '#fff',
-              mb: 1
-            }}
-          >
+          <FormLabel sx={{ ...formLabelStyles, mb: 1 }}>
             Modalità di pagamento
           </FormLabel>
 
           <RadioGroup
             name="payment"
             value={form.payment}
-            onChange={
-              handleChange
-            }
+            onChange={handleChange}
           >
             <FormControlLabel
               value="pickup"
-              control={
-                <Radio
-                  sx={
-                    radioStyles
-                  }
-                />
-              }
+              control={<Radio sx={radioStyles} />}
               label="Ritira al ristorante"
-              sx={{
-                color: '#fff'
-              }}
+              sx={{ color: colors.ink, fontFamily }}
             />
 
             <FormControlLabel
               value="cash"
-              control={
-                <Radio
-                  sx={
-                    radioStyles
-                  }
-                />
-              }
+              control={<Radio sx={radioStyles} />}
               label="Paga alla consegna"
-              sx={{
-                color: '#fff'
-              }}
+              sx={{ color: colors.ink, fontFamily }}
             />
 
             <FormControlLabel
               value="card"
-              control={
-                <Radio
-                  sx={
-                    radioStyles
-                  }
-                />
-              }
+              control={<Radio sx={radioStyles} />}
               label="Paga con carta"
-              sx={{
-                color: '#fff'
-              }}
+              sx={{ color: colors.ink, fontFamily }}
             />
           </RadioGroup>
         </FormControl>
 
-        {/* TOTAL */}
-
         <Box
           sx={{
-            mt: 2,
+            mt: 1,
             p: 2,
-
             borderRadius: 2,
-
-            backgroundColor:
-              'rgba(255,255,255,0.05)',
-
-            border:
-              '1px solid rgba(255,255,255,0.1)'
+            backgroundColor: colors.bg,
+            border: `1px solid ${colors.border}`,
           }}
         >
           <Typography
             variant="body2"
             sx={{
-              opacity: 0.7,
-              color: '#fff',
-              fontSize:
-                '1.2rem'
+              color: colors.muted,
+              fontSize: '1rem',
+              fontFamily,
             }}
           >
             Totale
@@ -545,44 +435,38 @@ export default function Checkout() {
           <Typography
             variant="h5"
             sx={{
-              fontWeight:
-                'bold',
-              color: '#fff'
+              fontWeight: 800,
+              color: colors.ink,
+              fontFamily,
             }}
           >
             {formatPrice(total)}
           </Typography>
         </Box>
 
-        {/* CTA */}
-
         <Button
           variant="contained"
           size="large"
-          disabled={!isValid}
+          disabled={!isValid || submitting}
           onClick={handleSubmit}
           sx={{
-            mt: 2,
-
+            mt: 1,
             height: 55,
-
-            fontWeight: 'bold',
-
-            textTransform:
-              'none',
-
-            background: isValid
-              ? 'linear-gradient(45deg, #ff416c, #ff4b2b)'
-              : 'rgba(255,255,255,0.2)',
-
-            boxShadow: isValid
-              ? '0 6px 20px rgba(255,75,43,0.5)'
-              : 'none',
-
-            color: '#fff'
+            fontWeight: 700,
+            textTransform: 'none',
+            fontFamily,
+            background: isValid && !submitting
+              ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`
+              : colors.borderStrong,
+            boxShadow: isValid && !submitting ? colors.shadowFab : 'none',
+            color: '#fff',
+            '&.Mui-disabled': {
+              color: colors.muted,
+              background: colors.bg,
+            },
           }}
         >
-          Conferma Ordine
+          {submitting ? 'Invio...' : 'Conferma Ordine'}
         </Button>
       </Box>
     </Container>

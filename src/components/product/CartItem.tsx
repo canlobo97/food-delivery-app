@@ -7,15 +7,15 @@ import {
   incrementQuantity,
   decrementQuantity,
   removeFromCart,
-  updateNote
+  updateNote,
 } from '../../store/cartSlice'
 import type { AppDispatch } from '../../store/store'
 import { useState } from 'react'
 import { formatPrice } from '../../utils/format'
+import { colors, fontFamily } from '../../theme/colors'
 
 export default function CartItem({ item }: any) {
   const dispatch = useDispatch<AppDispatch>()
-
   const [editing, setEditing] = useState(false)
   const [noteValue, setNoteValue] = useState(item.notes || '')
 
@@ -23,22 +23,19 @@ export default function CartItem({ item }: any) {
     <Box
       sx={{
         display: 'flex',
-        gap: 2,
-        mb: 2,
+        gap: 1.5,
+        mb: 1.5,
         p: 1.5,
         borderRadius: 3,
-        backdropFilter: 'blur(12px)',
-        backgroundColor: '#1c1c1e',
-        color: '#fff',
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-        transition: 'all 0.2s ease',
-        '&:active': {
-          transform: 'scale(0.98)'
-        }
+        bgcolor: colors.surface,
+        color: colors.ink,
+        border: `1px solid ${colors.border}`,
+        boxShadow: colors.shadow,
+        fontFamily,
+        transition: 'transform 0.15s ease',
+        '&:active': { transform: 'scale(0.99)' },
       }}
     >
-      {/* 🖼 IMMAGINE */}
       <Box
         component="img"
         src={item.image || '/placeholder.png'}
@@ -46,40 +43,36 @@ export default function CartItem({ item }: any) {
         sx={{
           width: 80,
           height: 80,
-          borderRadius: 3,
-          objectFit: 'cover'
+          borderRadius: 2.5,
+          objectFit: 'cover',
+          flexShrink: 0,
         }}
       />
 
-      {/* 📄 CONTENUTO */}
       <Box
         sx={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          minWidth: 0,
         }}
       >
-        {/* 🔝 NOME + PREZZO */}
         <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'flex-start'
+            alignItems: 'flex-start',
+            gap: 1,
           }}
         >
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
-              sx={{
-                fontWeight: 600,
-                fontSize: '1rem',
-                lineHeight: 1.2
-              }}
+              sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, fontFamily }}
             >
               {item.name}
             </Typography>
 
-            {/* 📝 NOTE */}
             {editing ? (
               <TextField
                 fullWidth
@@ -96,96 +89,79 @@ export default function CartItem({ item }: any) {
                     setEditing(false)
                   }
                 }}
-                placeholder="nota"
+                placeholder="Aggiungi una nota"
                 autoFocus
                 sx={{
-                  mt: 0.5,
+                  mt: 0.75,
                   '& .MuiInputBase-root': {
-                    backgroundColor: '#fff',
-                    borderRadius: 2
+                    backgroundColor: colors.bg,
+                    borderRadius: 2,
                   },
-                  '& .MuiInputBase-input': {
-                    color: '#000'
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  }
                 }}
               />
             ) : (
               <Typography
                 onClick={() => setEditing(true)}
                 sx={{
-                  fontSize: '1rem',
-                  opacity: 0.7,
+                  fontSize: '0.85rem',
+                  color: colors.muted,
                   mt: 0.5,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontFamily,
                 }}
               >
-                {item.notes ? `📝 ${item.notes}` : '➕ Aggiungi nota'}
+                {item.notes ? item.notes : 'Aggiungi nota'}
               </Typography>
             )}
           </Box>
 
-          {/* 💰 PREZZO FIXED */}
-          <Typography
-            sx={{
-              fontWeight: 'bold',
-              fontSize: '1rem',
-              ml: 1
-            }}
-          >
+          <Typography sx={{ fontWeight: 800, fontSize: '1rem', whiteSpace: 'nowrap', fontFamily }}>
             {formatPrice(item.price * item.quantity)}
           </Typography>
         </Box>
 
-        {/* 🔻 CONTROLLI */}
         <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            mt: 1
+            mt: 1,
           }}
         >
-          {/* ➖ ➕ */}
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 1,
-              backgroundColor: 'rgba(255,255,255,0.08)',
-              borderRadius: 5,
-              px: 1
+              gap: 0.5,
+              bgcolor: colors.bg,
+              borderRadius: 999,
+              px: 0.5,
+              border: `1px solid ${colors.border}`,
             }}
           >
             <IconButton
               size="small"
               onClick={() => dispatch(decrementQuantity(item.id))}
-              sx={{ color: '#fff' }}
+              sx={{ color: colors.ink }}
             >
               <RemoveIcon fontSize="small" />
             </IconButton>
-
-            <Typography sx={{ minWidth: 20, textAlign: 'center' }}>
+            <Typography sx={{ minWidth: 24, textAlign: 'center', fontWeight: 700, fontFamily }}>
               {item.quantity}
             </Typography>
-
             <IconButton
               size="small"
               onClick={() => dispatch(incrementQuantity(item.id))}
-              sx={{ color: '#fff' }}
+              sx={{ color: colors.ink }}
             >
               <AddIcon fontSize="small" />
             </IconButton>
           </Box>
 
-          {/* 🗑 REMOVE */}
           <IconButton
             onClick={() => dispatch(removeFromCart(item.id))}
-            sx={{
-              color: '#ff4b2b'
-            }}
+            aria-label="Rimuovi"
+            sx={{ color: colors.accent }}
           >
             <DeleteIcon />
           </IconButton>

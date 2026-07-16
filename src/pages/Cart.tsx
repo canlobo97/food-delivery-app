@@ -3,221 +3,159 @@ import { Link } from 'react-router-dom'
 import { clearCart } from '../store/cartSlice'
 import type { RootState, AppDispatch } from '../store/store'
 
-import {
-  Container,
-  Typography,
-  Button,
-  Box,
-} from '@mui/material'
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Container, Typography, Button, Box } from '@mui/material'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 import CartItem from '../components/product/CartItem'
-
 import { formatPrice } from '../utils/format'
+import { colors, fontFamily } from '../theme/colors'
 
 export default function Cart() {
   const dispatch = useDispatch<AppDispatch>()
-
-  const cart = useSelector(
-    (state: RootState) => state.cart.items
-  )
-
-  const total = cart.reduce(
-    (sum, item) =>
-      sum + item.price * item.quantity,
-    0
-  )
+  const cart = useSelector((state: RootState) => state.cart.items)
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
     <Container
       sx={{
-        mt: 4,
-
-        // 🔥 spazio sotto per navbar + barra checkout
-        pb: {
-          xs: 38,
-          md: 24
-        }
+        mt: 2,
+        px: { xs: 1.5, sm: 2 },
+        pb: { xs: 28, md: 20 },
+        minHeight: '100dvh',
+        bgcolor: colors.bg,
+        maxWidth: '100% !important',
+        fontFamily,
       }}
     >
-      {/* HEADER */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 2
+          maxWidth: 600,
+          mx: 'auto',
+          width: '100%',
         }}
       >
-        <Typography variant="h4">
-          Il mio carrello
-        </Typography>
-
-        {cart.length > 0 && (
-          <Button
-            onClick={() =>
-              dispatch(clearCart())
-            }
-            sx={{
-              color: '#ff4b2b',
-              fontWeight: 'bold',
-              textTransform: 'none'
-            }}
-          >svuota 
-            <DeleteIcon color="error" />
-          </Button>
-        )}
-      </Box>
-
-      {cart.length === 0 ? (
-        <Typography>
-          Il carrello è vuoto
-        </Typography>
-      ) : (
-        <>
-          {cart.map((item) => (
-            <CartItem
-              key={item.id}
-              item={item}
-            />
-          ))}
-
-          {/* STICKY CHECKOUT BAR */}
-          <Box
-            sx={{
-              position: 'fixed',
-
-              // 🔥 IMPORTANTISSIMO
-              // alza la barra sopra la bottom navbar mobile
-              bottom: {
-                xs: 'calc(73px + env(safe-area-inset-bottom))',
-                md: 0
-              },
-
-              left: 0,
-              width: '100%',
-              zIndex: 2000,
-
-              backdropFilter: 'blur(12px)',
-              backgroundColor: 'rgb(0,0,0)',
-
-              borderTop:
-                '1px solid rgba(255,255,255,0.1)'
-            }}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, fontWeight: 800, fontFamily }}
           >
+            Carrello
+          </Typography>
+
+          {cart.length > 0 && (
+            <Button
+              onClick={() => dispatch(clearCart())}
+              endIcon={<DeleteIcon />}
+              sx={{
+                color: colors.accent,
+                fontWeight: 700,
+                textTransform: 'none',
+                fontFamily,
+              }}
+            >
+              Svuota
+            </Button>
+          )}
+        </Box>
+
+        {cart.length === 0 ? (
+          <Box sx={{ mt: 6, textAlign: 'center', px: 2 }}>
+            <Typography sx={{ color: colors.muted, mb: 2, fontFamily }}>
+              Il carrello è vuoto
+            </Typography>
+            <Button
+              variant="contained"
+              component={Link}
+              to="/menu"
+              sx={{
+                textTransform: 'none',
+                fontWeight: 700,
+                bgcolor: colors.accent,
+                fontFamily,
+                '&:hover': { bgcolor: colors.accentDark },
+              }}
+            >
+              Vai al menu
+            </Button>
+          </Box>
+        ) : (
+          <>
+            {cart.map((item) => (
+              <CartItem key={item.id} item={item} />
+            ))}
+
             <Box
               sx={{
-                maxWidth: 600,
-                mx: 'auto',
-                width: '90%',
-
-                px: 1,
-
-                py: {
-                  xs: 2,
-                  md: 3
-                }
+                position: 'fixed',
+                bottom: {
+                  xs: 'calc(64px + env(safe-area-inset-bottom))',
+                  md: 0,
+                },
+                left: 0,
+                width: '100%',
+                zIndex: 1100,
+                bgcolor: colors.navBg,
+                backdropFilter: 'blur(16px)',
+                borderTop: `1px solid ${colors.border}`,
               }}
             >
               <Box
                 sx={{
+                  maxWidth: 560,
+                  mx: 'auto',
+                  width: '100%',
+                  px: 2,
+                  py: 1.5,
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: 2
+                  alignItems: 'center',
+                  gap: 1.5,
                 }}
               >
-                {/* TORNA */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: colors.muted, fontWeight: 600, fontFamily }}
+                  >
+                    Totale
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 800, lineHeight: 1.2, fontFamily }}
+                  >
+                    {formatPrice(total)}
+                  </Typography>
+                </Box>
+
                 <Button
-                  fullWidth
                   variant="contained"
                   component={Link}
-                  to="/menu"
+                  to="/checkout"
                   sx={{
-                    height: 50,
-                    fontWeight: 'bold',
+                    height: 52,
+                    px: 3,
+                    minWidth: 140,
+                    fontSize: '1rem',
+                    fontWeight: 700,
                     textTransform: 'none',
-
-                    backgroundColor:
-                      'rgba(255,255,255,0.08)',
-
-                    color: '#fff',
-
-                    border:
-                      '1px solid rgba(255,255,255,0.15)'
+                    fontFamily,
+                    background: `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`,
+                    boxShadow: colors.shadowFab,
                   }}
                 >
-                  ← Torna ad ordinare
+                  Continua
                 </Button>
-
-                {/* TOTALE + PAGA */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-
-                    p: 1.5,
-
-                    borderRadius: 2,
-
-                    backgroundColor:
-                      'rgba(255,255,255,0.05)',
-
-                    border:
-                      '1px solid rgba(255,255,255,0.1)'
-                  }}
-                >
-                  {/* TOTALE */}
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        opacity: 0.7,
-                        color: '#fff'
-                      }}
-                    >
-                      Totale
-                    </Typography>
-
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 'bold',
-                        color: '#fff'
-                      }}
-                    >
-                      {formatPrice(total)}
-                    </Typography>
-                  </Box>
-
-                  {/* PAGA */}
-                  <Button
-                    variant="contained"
-                    component={Link}
-                    to="/checkout"
-                    sx={{
-                      height: 55,
-                      px: 3,
-
-                      fontSize: '1rem',
-                      fontWeight: 'bold',
-                      textTransform: 'none',
-
-                      background:
-                        'linear-gradient(45deg, #ff416c, #ff4b2b)',
-
-                      boxShadow:
-                        '0 6px 20px rgba(255,75,43,0.5)'
-                    }}
-                  >
-                    💳 Paga
-                  </Button>
-                </Box>
               </Box>
             </Box>
-          </Box>
-        </>
-      )}
+          </>
+        )}
+      </Box>
     </Container>
   )
 }

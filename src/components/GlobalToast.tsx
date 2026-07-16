@@ -12,7 +12,7 @@ export default function GlobalToast() {
       open={toast.open}
       autoHideDuration={3000}
       onClose={() => dispatch(hideToast())}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
       <Alert
         severity={toast.type as any}

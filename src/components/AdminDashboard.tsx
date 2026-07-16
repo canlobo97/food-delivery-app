@@ -10,6 +10,7 @@ import {
   LocalShipping,
 } from '@mui/icons-material'
 import { formatPrice } from '../utils/format'
+import { colors, fontFamily } from '../theme/colors'
 
 export default function AdminDashboard({ orders }: { orders: any[] }) {
   const delivered = orders.filter(o => o.status === 'consegnato')
@@ -22,17 +23,17 @@ export default function AdminDashboard({ orders }: { orders: any[] }) {
     {
       title: 'Entrate',
       value: `${formatPrice(totalRevenue)}`,
-      icon: <TrendingUp />,
+      icon: <TrendingUp sx={{ color: colors.accent }} />,
     },
     {
       title: 'Ordini Totali',
       value: orders.length,
-      icon: <LocalShipping />,
+      icon: <LocalShipping sx={{ color: colors.accent }} />,
     },
   ]
 
   return (
-    <Box sx={{ mt: 4 }}>
+    <Box sx={{ mt: 4, fontFamily }}>
       <Grid container spacing={2}>
         {stats.map((stat, i) => (
           <Grid
@@ -42,13 +43,10 @@ export default function AdminDashboard({ orders }: { orders: any[] }) {
             <Card
               sx={{
                 borderRadius: { xs: 3, md: 4 },
-                background: 'linear-gradient(145deg, #1c1c1e, #2c2c2e)',
-                color: '#fff',
-                boxShadow: {
-                  xs: '0 6px 20px rgba(0,0,0,0.3)',
-                  md: '0 10px 30px rgba(0,0,0,0.4)'
-                },
-                border: '1px solid rgba(255,255,255,0.08)',
+                backgroundColor: colors.surface,
+                color: colors.ink,
+                boxShadow: colors.shadow,
+                border: `1px solid ${colors.border}`,
                 transition: 'all 0.3s',
                 '&:hover': {
                   transform: { md: 'translateY(-5px)' }
@@ -67,8 +65,9 @@ export default function AdminDashboard({ orders }: { orders: any[] }) {
                   <Box>
                     <Typography
                       sx={{
-                        opacity: 0.6,
-                        fontSize: { xs: 12, md: 14 }
+                        color: colors.muted,
+                        fontSize: { xs: 12, md: 14 },
+                        fontFamily,
                       }}
                     >
                       {stat.title}
@@ -76,12 +75,14 @@ export default function AdminDashboard({ orders }: { orders: any[] }) {
 
                     <Typography
                       sx={{
-                        fontWeight: 'bold',
+                        fontWeight: 800,
                         mt: 1,
                         fontSize: {
                           xs: '20px',
                           md: '24px'
-                        }
+                        },
+                        fontFamily,
+                        color: colors.ink,
                       }}
                     >
                       {stat.value}
@@ -98,8 +99,7 @@ export default function AdminDashboard({ orders }: { orders: any[] }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      background: 'linear-gradient(45deg,#ff416c,#ff4b2b)',
-                      boxShadow: '0 6px 20px rgba(255,75,43,0.5)'
+                      background: colors.accentSoft,
                     }}
                   >
                     {stat.icon}

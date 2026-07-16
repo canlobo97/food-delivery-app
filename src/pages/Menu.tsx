@@ -15,6 +15,7 @@ import ProductCard from '../components/product/ProductCard'
 
 import { useProducts } from '../utils/useProducts'
 import type { Product } from '../types/product'
+import { colors } from '../theme/colors'
 
 export default function Menu() {
   const { products, loading } = useProducts()
@@ -45,6 +46,7 @@ export default function Menu() {
 
   const categories = Object.keys(grouped)
 
+  // Logica categorie invariata — solo stile aggiornato
   const handleTabChange = (
     _: React.SyntheticEvent,
     value: number
@@ -72,22 +74,22 @@ export default function Menu() {
     <Box
       sx={{
         width: '100%',
+        minHeight: '100dvh',
+        bgcolor: colors.bg,
+        fontFamily: '"Outfit", system-ui, sans-serif',
         pb: {
           xs: 14,
           md: 4
         }
       }}
     >
-      {/* CATEGORY BAR */}
+      {/* CATEGORY BAR — stessa logica Tabs, look app-native */}
       <Box
         sx={{
           top: 0,
           zIndex: 1000,
-          pb: 1,
-          background: 'rgba(0,0,0,0.92)',
-
-          borderBottom:
-            '1px solid rgba(255,255,255,0.06)'
+          bgcolor: colors.surface,
+          borderBottom: `1px solid ${colors.border}`,
         }}
       >
         <Tabs
@@ -96,24 +98,28 @@ export default function Menu() {
           variant="scrollable"
           scrollButtons={false}
           sx={{
-            minHeight: 55,
+            minHeight: 48,
+            px: 0.5,
 
             '& .MuiTabs-indicator': {
-              background:
-                'linear-gradient(45deg,#ff416c,#ff4b2b)',
+              backgroundColor: colors.accent,
               height: 3,
               borderRadius: 999
             },
 
             '& .MuiTab-root': {
-              color: '#fff',
+              color: colors.muted,
               textTransform: 'none',
               fontWeight: 700,
-              minHeight: 55
+              fontFamily: 'inherit',
+              fontSize: '0.95rem',
+              minHeight: 48,
+              minWidth: 'auto',
+              px: 2,
             },
 
             '& .Mui-selected': {
-              color: '#ff4b2b !important'
+              color: `${colors.accent} !important`
             }
           }}
         >
@@ -130,12 +136,20 @@ export default function Menu() {
       <Box
         sx={{
           maxWidth: 1200,
-          mx: 'auto'
+          mx: 'auto',
+          px: { xs: 1.5, md: 2 },
         }}
       >
         {loading ? (
-          <Typography sx={{ mt: 2 }}>
-            Caricamento...
+          <Typography
+            sx={{
+              mt: 4,
+              color: colors.muted,
+              textAlign: 'center',
+              fontFamily: 'inherit',
+            }}
+          >
+            Caricamento menu...
           </Typography>
         ) : (
           categories.map((category) => (
@@ -144,25 +158,27 @@ export default function Menu() {
               ref={(el: HTMLDivElement | null) => { categoryRefs.current[category] = el }}
               sx={{
                 mt: 3,
-                px: 1
               }}
             >
               <Typography
                 variant="h5"
                 sx={{
-                  mb: 2,
-                  fontWeight: 'bold',
-                  color: '#000000'
+                  mb: 1.5,
+                  fontWeight: 800,
+                  fontSize: '1.25rem',
+                  letterSpacing: '-0.02em',
+                  color: colors.ink,
+                  fontFamily: 'inherit',
                 }}
               >
-                {category.toUpperCase()}
+                {category}
               </Typography>
 
               <Box
                 sx={{
                   display: 'flex',
                   flexWrap: 'wrap',
-                  gap: 2
+                  gap: 1.5
                 }}
               >
                 {grouped[category].map(
@@ -172,8 +188,8 @@ export default function Menu() {
                       sx={{
                         width: {
                           xs: '100%',
-                          sm: 'calc(50% - 8px)',
-                          md: 'calc(33.33% - 12px)'
+                          sm: 'calc(50% - 6px)',
+                          md: 'calc(33.33% - 10px)'
                         }
                       }}
                     >

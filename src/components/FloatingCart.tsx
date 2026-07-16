@@ -1,139 +1,70 @@
-import {
-  Fab,
-  Badge,
-} from '@mui/material'
-
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-
+import { Fab, Badge } from '@mui/material'
+import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined'
 import { useSelector } from 'react-redux'
-
-import {
-  useNavigate,
-  useLocation
-} from 'react-router-dom'
-
-import {
-  useEffect,
-  useState,
-  useRef
-} from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState, useRef } from 'react'
+import { colors } from '../theme/colors'
 
 export default function FloatingCart() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const cartItems = useSelector(
-    (state: any) => state.cart.items
-  )
-
+  const cartItems = useSelector((state: any) => state.cart.items)
   const totalItems = cartItems.reduce(
-    (sum: number, item: any) =>
-      sum + item.quantity,
+    (sum: number, item: any) => sum + item.quantity,
     0
   )
 
-  const [animate, setAnimate] =
-    useState(false)
-
-  // salva valore precedente
-  const prevTotalRef =
-    useRef(totalItems)
+  const [animate, setAnimate] = useState(false)
+  const prevTotalRef = useRef(totalItems)
 
   useEffect(() => {
-    // trigger SOLO se aumenta
     if (totalItems > prevTotalRef.current) {
       setAnimate(true)
-
-      if (navigator.vibrate) {
-        navigator.vibrate(100)
-      }
-
-      const timeout = setTimeout(() => {
-        setAnimate(false)
-      }, 300)
-
-      return () =>
-        clearTimeout(timeout)
+      if (navigator.vibrate) navigator.vibrate(40)
+      const timeout = setTimeout(() => setAnimate(false), 280)
+      prevTotalRef.current = totalItems
+      return () => clearTimeout(timeout)
     }
-
     prevTotalRef.current = totalItems
   }, [totalItems])
 
-  if (location.pathname === '/cart')
-    return null
-
-  if (location.pathname === '/login')
-    return null
-
-  if (location.pathname === '/admin')
-    return null
-
-  if (location.pathname === '/checkout')
-    return null
-
-  if (
-    location.pathname === '/register'
-  )
-    return null
-
+  const hidden = ['/cart', '/login', '/admin', '/checkout', '/register']
+  if (hidden.some((p) => location.pathname.includes(p))) return null
   if (totalItems === 0) return null
 
   return (
     <Fab
       onClick={() => navigate('/cart')}
+      aria-label="Apri carrello"
       sx={{
         position: 'fixed',
-
-        // DESKTOP
-        top: {
-          xs: 'auto',
-          md: 75
-        },
-
-        // MOBILE
+        top: { xs: 'auto', md: 80 },
         bottom: {
-          xs:
-            'calc(85px + env(safe-area-inset-bottom))',
-          md: 'auto'
+          xs: 'calc(76px + env(safe-area-inset-bottom))',
+          md: 'auto',
         },
-
-        right: 20,
-
+        right: 16,
         zIndex: 1000,
-
-        backdropFilter: 'blur(10px)',
-
-        backgroundColor:
-          'rgba(0,0,0,0.8)',
-
+        bgcolor: colors.accent,
         color: '#fff',
-
-        boxShadow:
-          totalItems > 0
-            ? '0 0 15px rgba(255,0,0,0.6), 0 8px 25px rgba(0,0,0,0.4)'
-            : '0 8px 25px rgba(0,0,0,0.4)',
-
-        border:
-          '1px solid rgba(255,255,255,0.1)',
-
-        transform: animate
-          ? 'scale(1.2)'
-          : 'scale(1)',
-
-        transition: 'all 0.2s ease',
-
-        '&:hover': {
-          transform: 'scale(1.1)',
-          backgroundColor:
-            'rgba(0,0,0,0.9)'
-        }
+        boxShadow: colors.shadowFab,
+        transform: animate ? 'scale(1.12)' : 'scale(1)',
+        transition: 'transform 0.2s ease',
+        '&:hover': { bgcolor: colors.accentDark },
       }}
     >
       <Badge
         badgeContent={totalItems}
-        color="error"
+        sx={{
+          '& .MuiBadge-badge': {
+            bgcolor: colors.ink,
+            color: '#fff',
+            fontWeight: 700,
+          },
+        }}
       >
-        <ShoppingCartIcon />
+        <ShoppingBagOutlinedIcon />
       </Badge>
     </Fab>
   )

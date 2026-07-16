@@ -8,6 +8,7 @@ import {
   ListItemText
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { colors, fontFamily } from '../../theme/colors'
 
 type Option = {
   label: string
@@ -38,7 +39,7 @@ export default function MobileSelect({
       <Box
         onClick={() => setOpen(true)}
         sx={{
-          backgroundColor: '#fff',
+          backgroundColor: colors.surface,
           borderRadius: 2,
           px: 2,
           py: 1.5,
@@ -46,20 +47,21 @@ export default function MobileSelect({
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: 'pointer',
-          border: '1px solid rgba(0,0,0,0.2)'
+          border: `1px solid ${colors.borderStrong}`,
+          fontFamily,
         }}
       >
         <Box>
-          <Typography sx={{ fontSize: 12, color: '#666' }}>
+          <Typography sx={{ fontSize: 12, color: colors.muted, fontFamily }}>
             {label}
           </Typography>
 
-          <Typography sx={{ fontWeight: 'bold', color: '#000' }}>
+          <Typography sx={{ fontWeight: 'bold', color: colors.ink, fontFamily }}>
             {selectedLabel}
           </Typography>
         </Box>
 
-        <ExpandMoreIcon sx={{ color: '#000' }} />
+        <ExpandMoreIcon sx={{ color: colors.ink }} />
       </Box>
 
       {/* 📱 BOTTOM SHEET */}
@@ -71,9 +73,10 @@ export default function MobileSelect({
           '& .MuiDrawer-paper': {
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
-            backgroundColor: '#1c1c1e',
-            color: '#fff',
-            pb: 3
+            backgroundColor: colors.surface,
+            color: colors.ink,
+            pb: 3,
+            fontFamily,
           }
         }}
       >
@@ -82,48 +85,59 @@ export default function MobileSelect({
           sx={{
             width: 40,
             height: 4,
-            backgroundColor: '#666',
+            backgroundColor: colors.borderStrong,
             borderRadius: 10,
             mx: 'auto',
             my: 2
           }}
         />
 
-        <Typography sx={{ px: 2, mb: 1, opacity: 0.7 }}>
+        <Typography sx={{ px: 2, mb: 1, color: colors.muted, fontFamily }}>
           {label}
         </Typography>
 
         <List>
-          {options.map((opt) => (
-            <ListItemButton
-              key={opt.value}
-              onClick={() => {
-                onChange(opt.value)
-                setOpen(false)
-              }}
-              sx={{
-                borderRadius: 2,
-                mx: 1,
-                mb: 1,
-                background:
-                  value === opt.value
-                    ? 'linear-gradient(45deg,#ff416c,#ff4b2b)'
-                    : 'transparent'
-              }}
-            >
-              <ListItemText
-                primary={
+          {options.map((opt) => {
+            const selected = value === opt.value
+
+            return (
+              <ListItemButton
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value)
+                  setOpen(false)
+                }}
+                sx={{
+                  borderRadius: 2,
+                  mx: 1,
+                  mb: 1,
+                  background: selected
+                    ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`
+                    : 'transparent',
+                  color: selected ? '#fff' : colors.ink,
+                  '&:hover': {
+                    background: selected
+                      ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentDark})`
+                      : colors.bg,
+                  },
+                }}
+              >
+                <ListItemText
+                  primary={
                     <Typography
-                    sx={{
-                        fontWeight: value === opt.value ? 'bold' : 'normal'
-                    }}
+                      sx={{
+                        fontWeight: selected ? 'bold' : 'normal',
+                        fontFamily,
+                        color: 'inherit',
+                      }}
                     >
-                    {opt.label}
+                      {opt.label}
                     </Typography>
-                }
+                  }
                 />
-            </ListItemButton>
-          ))}
+              </ListItemButton>
+            )
+          })}
         </List>
       </Drawer>
     </>
